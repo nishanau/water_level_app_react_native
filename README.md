@@ -1,50 +1,86 @@
-# Welcome to your Expo app 👋
+# Water Tank Monitor
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native mobile app built with Expo that monitors water tank levels and manages automatic water ordering.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Real-time Water Level Monitoring**: View your current water level with intuitive visual indicators
+- **Automatic Ordering**: Set thresholds for automatic water ordering when levels are low
+- **Order Management**: Track, cancel or reschedule your water deliveries
+- **Usage Statistics**: View historical water usage data with charts
+- **Customizable Settings**: Configure tank size, usage patterns, and notification preferences
 
-   ```bash
-   npm install
-   ```
+## Screens
 
-2. Start the app
+- **Home**: View current water level, days remaining, and next delivery date
+- **History**: View historical water level data and notifications
+- **Orders**: Manage upcoming and past water deliveries
+- **Settings**: Configure app settings, tank parameters, and notification preferences
 
-   ```bash
-   npx expo start
-   ```
+## Technologies Used
 
-In the output, you'll find options to open the app in a
+- React Native
+- Expo
+- React Navigation
+- Victory Native (for charts)
+- Expo Notifications
+- React Native Paper
+- Async Storage
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Getting Started
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Prerequisites
 
-## Get a fresh project
+- Node.js (v20.14 or later)
+- Expo CLI
+- iOS/Android Simulator or physical device
 
-When you're ready, run:
+### Installation
 
-```bash
-npm run reset-project
+1. Clone the repository:
+```
+git clone https://github.com/yourusername/water-tank-monitor.git
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Navigate to the project directory:
+```
+cd water-tank-monitor
+```
 
-## Learn more
+3. Install dependencies:
+```
+npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+4. Start the Expo development server:
+```
+npx expo start
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+5. Open the app on your simulator or device using the Expo Go app or by pressing 'a' for Android or 'i' for iOS in the terminal.
 
-## Join the community
+## Usage
 
-Join our community of developers creating universal apps.
+- On first launch, go to the Settings tab to configure your water tank size and preferences
+- The Home screen will display your current water level and estimated days remaining
+- Toggle auto-ordering on/off from the Home screen
+- View your water usage history in the History tab
+- Manage your water orders in the Orders tab
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Customization
+
+You can customize various aspects of the app:
+
+- Tank size and measurement units
+- Low water threshold for automatic ordering
+- Notification preferences
+- Preferred water suppliers
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- This app was created as a demonstration project
+- Uses mock data for demonstration purposes

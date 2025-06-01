@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "water_level_reactnative_js",
-    "slug": "water_level_reactnative_js",
+    "name": "Water Tank Monitor",
+    "slug": "water-tank-monitor",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "waterlevelreactnativejs",
+    "scheme": "watertankmonitor",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
