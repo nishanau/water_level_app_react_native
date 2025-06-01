@@ -1,10 +1,19 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import React, { useState } from 'react';
-import { FlatList, Modal, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useAppContext } from '../AppContext';
-import { OrderItem } from '../components';
-import { COLORS } from '../constants';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import React, { useState } from "react";
+import {
+  FlatList,
+  Modal,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useAppContext } from "../AppContext";
+import { OrderItem } from "../components";
+import { COLORS } from "../constants";
 
 // Define interfaces for our data types
 interface Order {
@@ -25,26 +34,40 @@ interface DateTimePickerEvent {
 }
 
 export default function OrdersScreen() {
-  const { orders, cancelOrder, rescheduleOrder } = useAppContext(); // Removed unused 'loading' variable
+  const { orders, cancelOrder, rescheduleOrder } = useAppContext();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [datePickerVisible, setDatePickerVisible] = useState<boolean>(false);
-  
+  const [showCancelConfirmModal, setShowCancelConfirmModal] =
+    useState<boolean>(false);
+  const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
+
   // Filter orders by status
-  const upcomingOrders = orders.filter((order: Order) => 
-    order.status === 'Scheduled' || order.status === 'In Transit'
+  const upcomingOrders = orders.filter(
+    (order: Order) =>
+      order.status === "Scheduled" || order.status === "In Transit"
   );
-  
-  const pastOrders = orders.filter((order: Order) => 
-    order.status === 'Delivered' || order.status === 'Cancelled'
+
+  const pastOrders = orders.filter(
+    (order: Order) =>
+      order.status === "Delivered" || order.status === "Cancelled"
   );
-  
-  // Handle order cancellation
-  const handleCancelOrder = async (orderId: string): Promise<void> => {
-    await cancelOrder(orderId);
+
+  // Show cancel confirmation modal
+  const showCancelConfirmation = (orderId: string): void => {
+    setOrderToCancel(orderId);
+    setShowCancelConfirmModal(true);
   };
-  
+
+  // Handle order cancellation
+  const handleCancelOrder = async (): Promise<void> => {
+    if (orderToCancel) {
+      await cancelOrder(orderToCancel);
+      setOrderToCancel(null);
+    }
+    setShowCancelConfirmModal(false);
+  };
   // Handle order rescheduling
   const handleReschedule = (order: Order): void => {
     setSelectedOrder(order);
@@ -52,31 +75,35 @@ export default function OrdersScreen() {
     setSelectedDate(date);
     setDatePickerVisible(true);
   };
-  
+
   // Handle date change
   const handleDateChange = (event: DateTimePickerEvent, date?: Date): void => {
-    if (Platform.OS === 'android') {
+    // On Android, the event.type will be 'set' if user selected a date
+    // or 'dismissed' if user cancelled
+    const userSelectedDate = event.type === "set" && date;
+
+    if (Platform.OS === "android") {
       setDatePickerVisible(false);
-    }
-    
-    if (date) {
-      setSelectedDate(date);
-      
-      if (Platform.OS === 'ios') {
+
+      if (userSelectedDate && selectedOrder) {
+        // Only reschedule if user actually selected a date
+        rescheduleOrder(selectedOrder.id, date);
+      }
+      // If cancelled or dismissed, do nothing
+      setSelectedOrder(null);
+    } else {
+      // On iOS, we show the confirmation buttons
+      if (userSelectedDate) {
+        setSelectedDate(date);
         setShowDatePicker(true);
       } else {
-        // On Android, directly reschedule when a date is selected
-        if (selectedOrder) {
-          rescheduleOrder(selectedOrder.id, date);
-          setSelectedOrder(null);
-        }
+        // User cancelled
+        setDatePickerVisible(false);
+        setSelectedOrder(null);
       }
-    } else {
-      // User cancelled
-      setSelectedOrder(null);
     }
   };
-  
+
   // Confirm rescheduling (for iOS)
   const confirmRescheduling = (): void => {
     if (selectedOrder) {
@@ -85,73 +112,86 @@ export default function OrdersScreen() {
       setSelectedOrder(null);
     }
   };
-  
+
   // Cancel rescheduling (for iOS)
   const cancelRescheduling = (): void => {
     setShowDatePicker(false);
     setSelectedOrder(null);
   };
-    // Render header for each section
+  // Render header for each section
   const renderSectionHeader = (title: string, count: number) => (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
       <Text style={styles.sectionCount}>{count} orders</Text>
     </View>
   );
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Water Orders</Text>
       </View>
-      
       <FlatList
         data={[]}
         ListHeaderComponent={() => (
-          <>
-            {renderSectionHeader('Upcoming Orders', upcomingOrders.length)}
-            
-            {upcomingOrders.length > 0 ? (
-              upcomingOrders.map((order: Order) => (
-                <OrderItem 
-                  key={order.id} 
-                  order={order} 
-                  onCancel={handleCancelOrder}
-                  onReschedule={handleReschedule}
-                />
-              ))
-            ) : (
-              <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons name="truck-delivery-outline" size={48} color={COLORS.gray} />
-                <Text style={styles.emptyText}>No upcoming orders</Text>
-                <Text style={styles.emptySubtext}>Your next order will appear here</Text>
-              </View>
-            )}
-            
-            {renderSectionHeader('Past Orders', pastOrders.length)}
-            
-            {pastOrders.length > 0 ? (
-              pastOrders.map((order: Order) => (
-                <OrderItem 
-                  key={order.id} 
-                  order={order}
-                  onCancel={undefined}
-                  onReschedule={undefined}
-                />
-              ))
-            ) : (
-              <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons name="history" size={48} color={COLORS.gray} />
-                <Text style={styles.emptyText}>No past orders</Text>
-              </View>
-            )}
-          </>
+          <View>
+            {/* Upcoming Orders Section */}
+            <View>
+              {renderSectionHeader("Upcoming Orders", upcomingOrders.length)}
+              {upcomingOrders.length > 0 ? (
+                upcomingOrders.map((order: Order) => (
+                  <OrderItem
+                    key={order.id}
+                    order={order}
+                    onCancel={showCancelConfirmation}
+                    onReschedule={handleReschedule}
+                  />
+                ))
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <MaterialCommunityIcons
+                    name="truck-delivery-outline"
+                    size={48}
+                    color={COLORS.gray}
+                  />
+                  <Text style={styles.emptyText}>No upcoming orders</Text>
+                  <Text style={styles.emptySubtext}>
+                    Your next order will appear here
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Past Orders Section */}
+            <View>
+              {renderSectionHeader("Past Orders", pastOrders.length)}
+              {pastOrders.length > 0 ? (
+                pastOrders.map((order: Order) => (
+                  <OrderItem
+                    key={order.id}
+                    order={order}
+                    onCancel={undefined}
+                    onReschedule={undefined}
+                  />
+                ))
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <MaterialCommunityIcons
+                    name="history"
+                    size={48}
+                    color={COLORS.gray}
+                  />
+                  <Text style={styles.emptyText}>No past orders</Text>
+                </View>
+              )}
+            </View>
+          </View>
         )}
         renderItem={() => null}
       />
-      
+
       {/* Date picker for Android */}
-      {Platform.OS === 'android' && datePickerVisible && (
+      {Platform.OS === "android" && datePickerVisible && (
         <DateTimePicker
           value={selectedDate}
           mode="date"
@@ -160,9 +200,9 @@ export default function OrdersScreen() {
           minimumDate={new Date()}
         />
       )}
-      
+
       {/* Date picker modal for iOS */}
-      {Platform.OS === 'ios' && (
+      {Platform.OS === "ios" && (
         <Modal
           visible={datePickerVisible}
           animationType="slide"
@@ -170,10 +210,8 @@ export default function OrdersScreen() {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>
-                Reschedule Delivery
-              </Text>
-              
+              <Text style={styles.modalTitle}>Reschedule Delivery</Text>
+
               <DateTimePicker
                 value={selectedDate}
                 mode="date"
@@ -181,17 +219,17 @@ export default function OrdersScreen() {
                 onChange={handleDateChange}
                 minimumDate={new Date()}
               />
-              
+
               {showDatePicker && (
                 <View style={styles.modalButtons}>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.modalButton, styles.cancelButton]}
                     onPress={cancelRescheduling}
                   >
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
-                  
-                  <TouchableOpacity 
+
+                  <TouchableOpacity
                     style={[styles.modalButton, styles.confirmButton]}
                     onPress={confirmRescheduling}
                   >
@@ -203,6 +241,44 @@ export default function OrdersScreen() {
           </View>
         </Modal>
       )}
+
+      {/* Cancel Order Confirmation Modal */}
+      <Modal
+        visible={showCancelConfirmModal}
+        animationType="fade"
+        transparent={true}
+      >
+        
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Cancel Order</Text>
+            <Text style={styles.modalText}>
+              Are you sure you want to cancel order {orderToCancel}? This action
+              cannot be undone.
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowCancelConfirmModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Keep Order</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.modalButton,
+                  styles.confirmButton,
+                  { backgroundColor: COLORS.danger },
+                ]}
+                onPress={handleCancelOrder}
+              >
+                <Text style={styles.confirmButtonText}>Cancel Order</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -219,13 +295,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: COLORS.lightGray,
@@ -233,7 +309,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.text,
   },
   sectionCount: {
@@ -242,12 +318,12 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     padding: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     color: COLORS.gray,
     marginTop: 12,
   },
@@ -255,28 +331,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.gray,
     marginTop: 4,
-  },
-  // Modal styles
+  },  // Modal styles
   modalContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    paddingHorizontal: 16,
   },
   modalContent: {
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 400,
+    margin: 16,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
     marginBottom: 16,
   },
+  modalText: {
+    fontSize: 16,
+    color: COLORS.text,
+    textAlign: "center",
+    marginBottom: 24,
+  },
   modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 16,
   },
   modalButton: {
@@ -284,7 +369,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     marginHorizontal: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   cancelButton: {
     backgroundColor: COLORS.lightGray,
@@ -294,10 +379,10 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: COLORS.text,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   confirmButtonText: {
     color: COLORS.white,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

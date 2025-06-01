@@ -28,12 +28,11 @@ export function AppProvider({ children }) {
     name: 'John Doe',
     email: 'john.doe@example.com',
     phone: '+1 (555) 123-4567',
-  });
-  const [preferredSupplier, setPreferredSupplier] = useState('Aqua Services Inc.');
+  });  const [preferredSupplier, setPreferredSupplier] = useState('Aqua Services Inc.');
   const [loading, setLoading] = useState(false);
   
-  // Send push notification
-  const schedulePushNotification = async (title, body) => {
+  // Send push notification - wrapped in useCallback to prevent it from changing on every render
+  const schedulePushNotification = useCallback(async (title, body) => {
     await Notifications.scheduleNotificationAsync({
       content: {
         title,
@@ -41,7 +40,7 @@ export function AppProvider({ children }) {
       },
       trigger: null, // immediately
     });
-  };
+  }, []);
   
   // Place new water order - defined before it's used in useEffect
   const placeOrder = useCallback(async () => {
@@ -212,13 +211,26 @@ export function AppProvider({ children }) {
       return false;
     }
   };
-  
-  // Reschedule order
+    // Reschedule order
   const rescheduleOrder = async (orderId, newDate) => {
+    // Validate inputs
+    if (!orderId || !newDate || !(newDate instanceof Date) || isNaN(newDate.getTime())) {
+      console.error('Invalid order ID or date for rescheduling');
+      return false;
+    }
+
     setLoading(true);
     try {
       // This would be an API call in a real app
       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Find the order to make sure it exists before updating
+      const orderExists = orders.some(order => order.id === orderId);
+      if (!orderExists) {
+        console.error(`Order with ID ${orderId} not found`);
+        setLoading(false);
+        return false;
+      }
       
       setOrders(prevOrders => prevOrders.map(order => 
         order.id === orderId 

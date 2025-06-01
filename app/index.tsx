@@ -16,7 +16,8 @@ export default function HomeScreen() {
     autoOrder, 
     setAutoOrder, 
     placeOrder, 
-    loading 
+    loading,
+    saveSettings
   } = useAppContext();
   
   // Calculate days remaining
@@ -24,8 +25,6 @@ export default function HomeScreen() {
   
   // Toggle auto-order
   const toggleAutoOrder = () => {
-    // We need to use the saveSettings function from context to persist the setting
-    const { saveSettings } = useAppContext();
     const newAutoOrderValue = !autoOrder;
     setAutoOrder(newAutoOrderValue);
     saveSettings({ autoOrder: newAutoOrderValue });
