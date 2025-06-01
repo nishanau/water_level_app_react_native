@@ -24,7 +24,11 @@ export default function HomeScreen() {
   
   // Toggle auto-order
   const toggleAutoOrder = () => {
-    setAutoOrder(!autoOrder);
+    // We need to use the saveSettings function from context to persist the setting
+    const { saveSettings } = useAppContext();
+    const newAutoOrderValue = !autoOrder;
+    setAutoOrder(newAutoOrderValue);
+    saveSettings({ autoOrder: newAutoOrderValue });
   };
   
   // Place manual order
