@@ -4,7 +4,7 @@
 
 ### Core Technologies
 - **Node.js** - Runtime environment
-- **Express.js** - Web framework
+- **Nest js** - Web framework
 - **MongoDB** - Database (flexible schema for IoT data)
 - **Mongoose** - ODM for MongoDB
 - **JWT** - Authentication

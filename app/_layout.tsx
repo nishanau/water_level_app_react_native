@@ -1,9 +1,9 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Notifications from 'expo-notifications';
-import { Tabs } from "expo-router";
-import { useEffect } from 'react';
-import { PaperProvider } from 'react-native-paper';
-import { AppProvider } from '../AppContext';
+import * as Notifications from "expo-notifications";
+import { Stack, useRouter, useSegments } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { AppProvider, useAppContext } from "../AppContext";
+import { COLORS } from "../constants";
 
 // Configure notifications
 Notifications.setNotificationHandler({
@@ -16,63 +16,75 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export default function RootLayout() {
+// Inner component that uses the context
+function RootLayoutNav() {
+  // Move all hooks to the top level - no conditional hooks
+  const context = useAppContext();
+  const [initialLoading, setInitialLoading] = useState(true);
+  const segments = useSegments();
+  const router = useRouter();
+
+  // Check if context is available
   useEffect(() => {
-    // Request notifications permissions
-    (async () => {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Notification permissions not granted');
-      }
-    })();
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, []);
 
+  // Handle auth state changes - always call this hook
+  useEffect(() => {
+    if (!context || initialLoading) return;
+
+    const { isAuthenticated, loading } = context;
+    if (loading || isAuthenticated === undefined) return;
+
+    // Check if user is in an auth route or main app route
+    const isAuthRoute = segments[0] === "login" || segments[0] === "register";
+
+    if (isAuthenticated && isAuthRoute) {
+      // Redirect to home if authenticated and trying to access auth screens
+      router.replace("/");
+    } else if (
+      !isAuthenticated &&
+      segments[0] !== "login" &&
+      segments[0] !== "register"
+    ) {
+      // Redirect to login if not authenticated and trying to access protected screens
+      router.replace("/login");
+    }
+  }, [context, initialLoading, segments, router]);
+
+  // Render based on loading state - no conditional hooks
+  if (!context || initialLoading || context.loading || context.isAuthenticated === undefined) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
   return (
-    <PaperProvider>
-      <AppProvider>
-        <Tabs screenOptions={{
-          tabBarActiveTintColor: '#0088cc',
-          tabBarInactiveTintColor: 'gray',
-          headerShown: false,
-        }}>
-          <Tabs.Screen
-            name="index"
-            options={{
-              title: "Home",
-              tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons name="home" color={color} size={size} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="history"
-            options={{
-              title: "History",
-              tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons name="chart-line" color={color} size={size} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="orders"
-            options={{
-              title: "Orders",
-              tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons name="truck-delivery" color={color} size={size} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="settings"
-            options={{
-              title: "Settings",
-              tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons name="cog" color={color} size={size} />
-              ),
-            }}
-          />
-        </Tabs>
-      </AppProvider>
-    </PaperProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="login" />
+      <Stack.Screen name="register" />
+      <Stack.Screen name="(tabs)" />
+    </Stack>
+  );
+}
+
+// Wrap the layout with the AppProvider
+export default function RootLayout() {
+  return (
+    <AppProvider>
+      <RootLayoutNav />
+    </AppProvider>
   );
 }

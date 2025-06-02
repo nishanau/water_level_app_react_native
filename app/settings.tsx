@@ -676,7 +676,7 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
 // Main Settings Screen
 export default function SettingsScreen() {
   const router = useRouter();
-  const { userProfile } = useAppContext();
+  const { userProfile, logout } = useAppContext();
   const [activeScreen, setActiveScreen] = useState('main');
   const [showSignOutModal, setShowSignOutModal] = useState(false);
     // Navigate to sub-screens
@@ -690,13 +690,15 @@ export default function SettingsScreen() {
   };
   
   // Handle sign out
-  const handleSignOut = () => {
-    // In a real app, you would clear auth tokens, etc.
-    setShowSignOutModal(false);
-    // Navigate to login screen or reset navigation
-    Alert.alert('Success', 'You have been signed out successfully');
-    // This would typically navigate to login screen
-    router.replace('/');
+  const handleSignOut = async () => {
+    try {
+      await logout(); // Use the logout function from AppContext
+      setShowSignOutModal(false);
+      router.replace('/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Alert.alert('Error', 'Failed to sign out. Please try again.');
+    }
   };
   
   // Render different screens based on navigation state
