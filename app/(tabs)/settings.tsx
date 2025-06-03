@@ -1,6 +1,7 @@
 import { useAppContext } from "@/AppContext";
 import { SettingItem } from "@/components";
 import { COLORS } from "@/constants";
+import apiService from "@/services/apiService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -19,8 +20,15 @@ import {
 
 // Tank Settings Sub-Screen
 function TankSettingsScreen({ onBack }: { onBack: () => void }) {
-  const { tankSize, avgDailyUsage, lowWaterThreshold, saveSettings } =
-    useAppContext();
+  const {
+    tankSize,
+    setTankSize,
+    setLowWaterThreshold,
+    setAvgDailyUsage,
+    avgDailyUsage,
+    lowWaterThreshold,
+    user,
+  } = useAppContext();
 
   // Local state to track changes
   const [localTankSize, setLocalTankSize] = useState(tankSize.toString());
@@ -30,7 +38,7 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
   );
 
   // Handle saving tank settings
-  const saveTankSettings = () => {
+  const saveTankSettings = async () => {
     const tankSizeNum = parseInt(localTankSize);
     const avgUsageNum = parseInt(localAvgUsage);
     const thresholdNum = parseInt(localThreshold);
@@ -51,11 +59,17 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
       return;
     }
 
-    saveSettings({
-      tankSize: tankSizeNum,
+    const response = await apiService.patchFields("tanks", user.tankIds[0], {
+      capacity: tankSizeNum,
       avgDailyUsage: avgUsageNum,
       lowWaterThreshold: thresholdNum,
     });
+
+    if (response) {
+      setTankSize(tankSizeNum);
+      setAvgDailyUsage(avgUsageNum);
+      setLowWaterThreshold(thresholdNum);
+    }
 
     Alert.alert("Success", "Tank settings saved successfully");
   };
@@ -695,7 +709,6 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
             />
 
             <View style={{ flexDirection: "row" }}>
-              {" "}
               <TextInput
                 style={[
                   styles.input,
@@ -889,9 +902,11 @@ export default function SettingsScreen() {
                 />
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Account</Text>
-                  <Text style={styles.menuItemDescription}>
-                    {/* {user.firstName} • {user.lastName} • {user.email} */}
-                  </Text>
+                  {user && (
+                    <Text style={styles.menuItemDescription}>
+                      {user.firstName} • {user.lastName} • {user.email}
+                    </Text>
+                  )}
                 </View>
               </View>
               <MaterialCommunityIcons
@@ -947,7 +962,7 @@ export default function SettingsScreen() {
 
             <View style={styles.appInfo}>
               <Text style={styles.appVersion}>Water Tank Monitor v1.0.0</Text>
-              <Text style={styles.appCopyright}>© 2025 Water Monitor Inc.</Text>
+              <Text style={styles.appCopyright}>© 2025 Nishan Shrestha.</Text>
             </View>
           </ScrollView>
 
@@ -969,7 +984,7 @@ export default function SettingsScreen() {
                     onPress={() => setShowSignOutModal(false)}
                   >
                     <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>{" "}
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.confirmButton]}
                     onPress={handleSignOut}

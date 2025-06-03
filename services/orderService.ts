@@ -5,7 +5,7 @@ const api = apiService.getAxiosInstance();
 class OrderService {
   async getOrders() {
     const response = await api.get("/orders");
-    console.log("Orders response:", response.data);
+
     return response.data;
   }
 

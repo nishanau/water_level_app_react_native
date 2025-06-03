@@ -1,6 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter, useSegments } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { AppProvider, useAppContext } from "../AppContext";
 import { COLORS } from "../constants";
@@ -20,22 +20,13 @@ Notifications.setNotificationHandler({
 function RootLayoutNav() {
   // Move all hooks to the top level - no conditional hooks
   const context = useAppContext();
-  const [initialLoading, setInitialLoading] = useState(true);
+
   const segments = useSegments();
   const router = useRouter();
 
-  // Check if context is available
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setInitialLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   // Handle auth state changes - always call this hook
   useEffect(() => {
-    if (!context || initialLoading) return;
+    if (!context) return;
 
     const { isAuthenticated, loading } = context;
     if (loading || isAuthenticated === undefined) return;
@@ -54,10 +45,12 @@ function RootLayoutNav() {
       // Redirect to login if not authenticated and trying to access protected screens
       router.replace("/login");
     }
-  }, [context, initialLoading, segments, router]);
+  }, [context, segments, router]);
 
   // Render based on loading state - no conditional hooks
-  if (!context || initialLoading || context.loading || context.isAuthenticated === undefined) {
+  if (!context || context.loading || context.isAuthenticated === undefined) {
+
+    
     return (
       <View
         style={{

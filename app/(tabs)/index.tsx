@@ -1,110 +1,173 @@
-import { useAppContext } from '@/AppContext';
-import { CircularProgressIndicator } from '@/components';
-import { calculateDaysRemaining, COLORS, formatDate } from '@/constants';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { useAppContext } from "@/AppContext";
+import { CircularProgressIndicator } from "@/components";
+import { calculateDaysRemaining, COLORS, formatDate } from "@/constants";
+import apiService from "@/services/apiService";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { 
-    waterLevel, 
-    tankSize, 
-    avgDailyUsage, 
-    nextDelivery, 
-    autoOrder, 
-    setAutoOrder, 
-    placeOrder, 
+
+  const {
+    waterLevel,
+    tankSize,
+    avgDailyUsage,
+    nextDelivery,
+    autoOrder,
+    user,
+    placeOrder,
     loading,
-    saveSettings
+    setUser,
+    setAutoOrder,
   } = useAppContext();
-  
+
   // Calculate days remaining
-  const daysRemaining = calculateDaysRemaining(waterLevel, tankSize, avgDailyUsage);
-  
-  // Toggle auto-order
-  const toggleAutoOrder = () => {
+  const daysRemaining = calculateDaysRemaining(
+    waterLevel,
+    tankSize,
+    avgDailyUsage
+  );
+
+  const toggleAutoOrder = async () => {
     const newAutoOrderValue = !autoOrder;
-    setAutoOrder(newAutoOrderValue);
-    saveSettings({ autoOrder: newAutoOrderValue });
+    try {
+      // Update state for immediate UI feedback
+      setAutoOrder(newAutoOrderValue);
+
+      // Update in database
+      const response = await apiService.patchFields("users", user.id, {
+        autoOrder: newAutoOrderValue,
+      });
+
+      if (response) {
+        // Get current userData from AsyncStorage
+        const userDataString = await AsyncStorage.getItem("userData");
+        if (userDataString) {
+          // Parse the existing userData
+          const userData = JSON.parse(userDataString);
+
+          // Update just the autoOrder field
+          userData.autoOrder = newAutoOrderValue;
+
+          // Save the updated userData back to AsyncStorage
+          await AsyncStorage.setItem("userData", JSON.stringify(userData));
+
+          // Also update the user object in context
+          if (setUser) {
+            // If you have setUser exposed in context
+            setUser(userData);
+          }
+        }
+      } else {
+        Alert.alert(
+          "Update Failed",
+          "Failed to update auto-order setting. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error updating auto-order:", error);
+    }
   };
-  
+
   // Place manual order
   const handlePlaceOrder = async () => {
     await placeOrder();
   };
-  
+
   // View order history
   const viewOrderHistory = () => {
-    router.push('/orders');
+    router.push("/orders");
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>Water Tank Monitor</Text>
         </View>
-        
+
         <View style={styles.tankContainer}>
           <CircularProgressIndicator level={waterLevel} size={250} />
         </View>
-        
+
         <View style={styles.infoContainer}>
           <View style={styles.infoCard}>
-            <MaterialCommunityIcons name="calendar-clock" size={24} color={COLORS.primary} style={styles.infoIcon} />
+            <MaterialCommunityIcons
+              name="calendar-clock"
+              size={24}
+              color={COLORS.primary}
+              style={styles.infoIcon}
+            />
             <View>
               <Text style={styles.infoLabel}>Estimated Days Remaining</Text>
               <Text style={styles.infoValue}>{daysRemaining} days</Text>
             </View>
           </View>
-          
+
           <View style={styles.infoCard}>
-            <MaterialCommunityIcons name="truck-delivery" size={24} color={COLORS.primary} style={styles.infoIcon} />
+            <MaterialCommunityIcons
+              name="truck-delivery"
+              size={24}
+              color={COLORS.primary}
+              style={styles.infoIcon}
+            />
             <View>
               <Text style={styles.infoLabel}>Next Scheduled Delivery</Text>
-              <Text style={styles.infoValue}>{nextDelivery ? formatDate(nextDelivery) : 'None'}</Text>
+              <Text style={styles.infoValue}>
+                {nextDelivery ? formatDate(nextDelivery) : "None"}
+              </Text>
             </View>
           </View>
         </View>
-        
+
         <View style={styles.autoOrderContainer}>
           <View style={styles.switchContainer}>
             <Text style={styles.switchLabel}>Auto-Ordering</Text>
             <Switch
               value={autoOrder}
               onValueChange={toggleAutoOrder}
-              trackColor={{ false: '#d1d1d1', true: COLORS.secondary }}
-              thumbColor={autoOrder ? COLORS.primary : '#f4f3f4'}
+              trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
+              thumbColor={autoOrder ? COLORS.primary : "#f4f3f4"}
             />
           </View>
           <Text style={styles.switchDescription}>
-            {autoOrder 
-              ? 'Auto-ordering is enabled. We\'ll place orders automatically when water level is low.'
-              : 'Auto-ordering is disabled. You need to place orders manually.'}
+            {autoOrder
+              ? "Auto-ordering is enabled. We'll place orders automatically when water level is low."
+              : "Auto-ordering is disabled. You need to place orders manually."}
           </Text>
         </View>
-        
+
         <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity 
-            style={[styles.actionButton, loading && styles.disabledButton]} 
+          <TouchableOpacity
+            style={[styles.actionButton, loading && styles.disabledButton]}
             onPress={handlePlaceOrder}
             disabled={loading}
           >
             <MaterialCommunityIcons name="water" size={20} color="white" />
             <Text style={styles.actionButtonText}>Place Manual Order</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.actionButton} 
+
+          <TouchableOpacity
+            style={styles.actionButton}
             onPress={viewOrderHistory}
           >
             <MaterialCommunityIcons name="history" size={20} color="white" />
             <Text style={styles.actionButtonText}>View Order History</Text>
           </TouchableOpacity>
         </View>
-        
+
         <View style={styles.quickStats}>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Tank Size</Text>
@@ -131,15 +194,15 @@ const styles = StyleSheet.create({
   header: {
     marginTop: 40,
     marginBottom: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
   },
   tankContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 20,
   },
   infoContainer: {
@@ -150,8 +213,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -168,7 +231,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.text,
   },
   autoOrderContainer: {
@@ -183,14 +246,14 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   switchLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.text,
   },
   switchDescription: {
@@ -203,9 +266,9 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     backgroundColor: COLORS.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 16,
     borderRadius: 10,
     marginBottom: 12,
@@ -215,12 +278,12 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: COLORS.white,
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 16,
     marginLeft: 8,
   },
   quickStats: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginVertical: 12,
   },
   statItem: {
@@ -242,7 +305,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.text,
   },
 });

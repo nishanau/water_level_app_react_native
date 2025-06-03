@@ -72,6 +72,7 @@ class AuthService {
     try {
       const token = await AsyncStorage.getItem("userToken");
       const userData = await AsyncStorage.getItem("userData");
+
       return {
         token,
         user: userData ? JSON.parse(userData) : null,

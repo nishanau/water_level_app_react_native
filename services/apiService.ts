@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosInstance } from "axios";
 
-const API_URL = "http://192.168.101.94:3000/api"; // Replace with your actual API URL
+const API_URL = "http://192.168.76.68:3000/api"; // Replace with your actual API URL
+//const API_URL = "http://192.168.101.94:3000/api"
 
 class ApiService {
   private api: AxiosInstance;
@@ -25,7 +26,9 @@ class ApiService {
     try {
       this.token = await AsyncStorage.getItem("userToken");
       if (this.token) {
-        this.api.defaults.headers.common["Authorization"] = `Bearer ${this.token}`;
+        this.api.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${this.token}`;
       }
     } catch (error) {
       console.error("Error loading token:", error);
@@ -54,6 +57,27 @@ class ApiService {
         return Promise.reject(error);
       }
     );
+  }
+  /**
+   * Patch multiple fields in any table.
+   * @param table The table/collection name (e.g., "users", "orders")
+   * @param id The record's unique identifier
+   * @param updates An object with fields and their new values
+   * @returns The updated record (or server response)
+   */
+  async patchFields(
+    table: string,
+    id: string,
+    updates: Record<string, any>
+  ): Promise<any> {
+    try {
+      const response = await this.api.patch(`/${table}/${id}`, updates);
+      console.log("Patch fields response:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("Patch fields error:", error);
+      throw new Error(error.response?.data?.message || "Update failed");
+    }
   }
 
   getAxiosInstance(): AxiosInstance {
