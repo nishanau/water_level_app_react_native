@@ -1,20 +1,16 @@
-import axios from 'axios';
+import apiService from "./apiService";
 
-const API_URL = 'http://your-api-url/api';
-
-const api = axios.create({
-  baseURL: API_URL,
-  timeout: 5000,
-});
+const api = apiService.getAxiosInstance();
 
 class OrderService {
   async getOrders() {
-    const response = await api.get('/orders');
+    const response = await api.get("/orders");
+    console.log("Orders response:", response.data);
     return response.data;
   }
 
   async placeOrder() {
-    const response = await api.post('/orders');
+    const response = await api.post("/orders");
     return response.data;
   }
 

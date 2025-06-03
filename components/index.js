@@ -133,7 +133,7 @@ export const OrderItem = ({ order, onCancel, onReschedule }) => {
         </Text>
       </View>
 
-      {(order.status === "Scheduled" || order.status === "In Transit") && (
+      {(order.status === "Scheduled" || order.status === "placed") && (
         <View style={styles.orderActions}>
           {onCancel && (
             <Text
@@ -187,7 +187,7 @@ export const NotificationItem = ({ notification }) => {
       <View style={styles.notificationContent}>
         <Text style={styles.notificationMessage}>{notification.message}</Text>
         <Text style={styles.notificationDate}>
-          {new Date(notification.date).toLocaleString()}
+          {new Date(notification.createdAt).toLocaleString()}
         </Text>
       </View>
     </View>

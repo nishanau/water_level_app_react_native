@@ -1,15 +1,11 @@
-import axios from 'axios';
+import apiService from "./apiService";
 
-const API_URL = 'http://your-api-url/api';
-
-const api = axios.create({
-  baseURL: API_URL,
-  timeout: 5000,
-});
+const api = apiService.getAxiosInstance();
 
 class NotificationService {
   async getNotifications() {
-    const response = await api.get('/notifications');
+    const response = await api.get("/notifications");
+    console.log("Notifications response:", response.data);
     return response.data;
   }
 }

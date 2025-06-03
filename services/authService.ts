@@ -47,9 +47,9 @@ class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       const response = await this.api.post("/auth/login", credentials);
-      const { token, user } = response.data;
+      const { access_token, user } = response.data;
 
-      await AsyncStorage.setItem("userToken", token);
+      await AsyncStorage.setItem("userToken", access_token);
       await AsyncStorage.setItem("userData", JSON.stringify(user));
 
       return response.data;
@@ -60,7 +60,8 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      await this.api.post("/auth/logout");
+      const res = await this.api.post("/auth/logout");
+      console.log("Logout response:", res.data);
     } finally {
       await AsyncStorage.removeItem("userToken");
       await AsyncStorage.removeItem("userData");

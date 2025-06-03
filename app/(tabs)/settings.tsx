@@ -1,6 +1,9 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Stack, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useAppContext } from "@/AppContext";
+import { SettingItem } from "@/components";
+import { COLORS } from "@/constants";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Stack, useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
   Alert,
   Modal,
@@ -11,66 +14,65 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
-} from 'react-native';
-import { useAppContext } from '../AppContext';
-import { SettingItem } from '../components';
-import { COLORS } from '../constants';
+  View,
+} from "react-native";
 
 // Tank Settings Sub-Screen
 function TankSettingsScreen({ onBack }: { onBack: () => void }) {
-  const { 
-    tankSize, 
-    avgDailyUsage, 
-    lowWaterThreshold, 
-    saveSettings 
-  } = useAppContext();
-  
+  const { tankSize, avgDailyUsage, lowWaterThreshold, saveSettings } =
+    useAppContext();
+
   // Local state to track changes
   const [localTankSize, setLocalTankSize] = useState(tankSize.toString());
   const [localAvgUsage, setLocalAvgUsage] = useState(avgDailyUsage.toString());
-  const [localThreshold, setLocalThreshold] = useState(lowWaterThreshold.toString());
-  
+  const [localThreshold, setLocalThreshold] = useState(
+    lowWaterThreshold.toString()
+  );
+
   // Handle saving tank settings
   const saveTankSettings = () => {
     const tankSizeNum = parseInt(localTankSize);
     const avgUsageNum = parseInt(localAvgUsage);
     const thresholdNum = parseInt(localThreshold);
-    
+
     // Validate inputs
     if (isNaN(tankSizeNum) || tankSizeNum <= 0) {
-      Alert.alert('Invalid Input', 'Tank size must be a positive number');
+      Alert.alert("Invalid Input", "Tank size must be a positive number");
       return;
     }
-    
+
     if (isNaN(avgUsageNum) || avgUsageNum <= 0) {
-      Alert.alert('Invalid Input', 'Average usage must be a positive number');
+      Alert.alert("Invalid Input", "Average usage must be a positive number");
       return;
     }
-    
+
     if (isNaN(thresholdNum) || thresholdNum < 0 || thresholdNum > 100) {
-      Alert.alert('Invalid Input', 'Threshold must be between 0 and 100');
+      Alert.alert("Invalid Input", "Threshold must be between 0 and 100");
       return;
     }
-    
+
     saveSettings({
       tankSize: tankSizeNum,
       avgDailyUsage: avgUsageNum,
-      lowWaterThreshold: thresholdNum
+      lowWaterThreshold: thresholdNum,
     });
-    
-    Alert.alert('Success', 'Tank settings saved successfully');
+
+    Alert.alert("Success", "Tank settings saved successfully");
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.primary} />
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={24}
+            color={COLORS.primary}
+          />
         </TouchableOpacity>
         <Text style={styles.title}>Tank Settings</Text>
       </View>
-      
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
           <SettingItem title="Tank Size">
@@ -85,7 +87,7 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
               <Text style={styles.inputLabel}>Liters</Text>
             </View>
           </SettingItem>
-          
+
           <SettingItem title="Average Daily Usage">
             <View style={styles.inputRow}>
               <TextInput
@@ -98,7 +100,7 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
               <Text style={styles.inputLabel}>Liters/day</Text>
             </View>
           </SettingItem>
-          
+
           <SettingItem title="Low Water Threshold">
             <View style={styles.inputRow}>
               <TextInput
@@ -111,11 +113,15 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
               <Text style={styles.inputLabel}>%</Text>
             </View>
             <Text style={styles.helperText}>
-              Auto-order will be triggered when water level falls below this threshold
+              Auto-order will be triggered when water level falls below this
+              threshold
             </Text>
           </SettingItem>
-          
-          <TouchableOpacity style={styles.saveButton} onPress={saveTankSettings}>
+
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={saveTankSettings}
+          >
             <Text style={styles.saveButtonText}>Save Tank Settings</Text>
           </TouchableOpacity>
         </View>
@@ -127,41 +133,46 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
 // Order Settings Sub-Screen
 function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
   const { autoOrder, preferredSupplier, saveSettings } = useAppContext();
-  
+
   // Local state to track changes
   const [localAutoOrder, setLocalAutoOrder] = useState(autoOrder);
-  const [localPreferredSupplier, setLocalPreferredSupplier] = useState(preferredSupplier);
-  
+  const [localPreferredSupplier, setLocalPreferredSupplier] =
+    useState(preferredSupplier);
+
   // Handle saving order settings
   const saveOrderSettings = () => {
     saveSettings({
       autoOrder: localAutoOrder,
-      preferredSupplier: localPreferredSupplier
+      preferredSupplier: localPreferredSupplier,
     });
-    
-    Alert.alert('Success', 'Order settings saved successfully');
+
+    Alert.alert("Success", "Order settings saved successfully");
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.primary} />
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={24}
+            color={COLORS.primary}
+          />
         </TouchableOpacity>
         <Text style={styles.title}>Order Settings</Text>
       </View>
-      
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
           <SettingItem title="Auto-Order">
             <Switch
               value={localAutoOrder}
               onValueChange={setLocalAutoOrder}
-              trackColor={{ false: '#d1d1d1', true: COLORS.secondary }}
-              thumbColor={localAutoOrder ? COLORS.primary : '#f4f3f4'}
+              trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
+              thumbColor={localAutoOrder ? COLORS.primary : "#f4f3f4"}
             />
           </SettingItem>
-          
+
           <SettingItem title="Preferred Supplier">
             <TextInput
               style={styles.input}
@@ -170,8 +181,11 @@ function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
               placeholder="Enter supplier name"
             />
           </SettingItem>
-          
-          <TouchableOpacity style={styles.saveButton} onPress={saveOrderSettings}>
+
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={saveOrderSettings}
+          >
             <Text style={styles.saveButtonText}>Save Order Settings</Text>
           </TouchableOpacity>
         </View>
@@ -183,66 +197,77 @@ function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
 // Notification Settings Sub-Screen
 function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
   const { notificationPreferences, saveSettings } = useAppContext();
-  
+
   // Local state to track changes
-  const [localNotifications, setLocalNotifications] = useState({...notificationPreferences});
+  const [localNotifications, setLocalNotifications] = useState({
+    ...notificationPreferences,
+  });
   // Toggle notification settings
   const toggleNotification = (type: string) => {
     setLocalNotifications((prev: any) => ({
       ...prev,
-      [type]: !prev[type]
+      [type]: !prev[type],
     }));
   };
-  
+
   // Handle saving notification preferences
   const saveNotificationSettings = () => {
     saveSettings({
-      notificationPreferences: localNotifications
+      notificationPreferences: localNotifications,
     });
-    
-    Alert.alert('Success', 'Notification settings saved successfully');
+
+    Alert.alert("Success", "Notification settings saved successfully");
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.primary} />
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={24}
+            color={COLORS.primary}
+          />
         </TouchableOpacity>
         <Text style={styles.title}>Notification Settings</Text>
       </View>
-      
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
           <SettingItem title="Push Notifications">
             <Switch
               value={localNotifications.push}
-              onValueChange={() => toggleNotification('push')}
-              trackColor={{ false: '#d1d1d1', true: COLORS.secondary }}
-              thumbColor={localNotifications.push ? COLORS.primary : '#f4f3f4'}
+              onValueChange={() => toggleNotification("push")}
+              trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
+              thumbColor={localNotifications.push ? COLORS.primary : "#f4f3f4"}
             />
           </SettingItem>
-          
+
           <SettingItem title="SMS Notifications">
             <Switch
               value={localNotifications.sms}
-              onValueChange={() => toggleNotification('sms')}
-              trackColor={{ false: '#d1d1d1', true: COLORS.secondary }}
-              thumbColor={localNotifications.sms ? COLORS.primary : '#f4f3f4'}
+              onValueChange={() => toggleNotification("sms")}
+              trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
+              thumbColor={localNotifications.sms ? COLORS.primary : "#f4f3f4"}
             />
           </SettingItem>
-          
+
           <SettingItem title="Email Notifications">
             <Switch
               value={localNotifications.email}
-              onValueChange={() => toggleNotification('email')}
-              trackColor={{ false: '#d1d1d1', true: COLORS.secondary }}
-              thumbColor={localNotifications.email ? COLORS.primary : '#f4f3f4'}
+              onValueChange={() => toggleNotification("email")}
+              trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
+              thumbColor={localNotifications.email ? COLORS.primary : "#f4f3f4"}
             />
           </SettingItem>
-          
-          <TouchableOpacity style={styles.saveButton} onPress={saveNotificationSettings}>
-            <Text style={styles.saveButtonText}>Save Notification Settings</Text>
+
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={saveNotificationSettings}
+          >
+            <Text style={styles.saveButtonText}>
+              Save Notification Settings
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -252,74 +277,80 @@ function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
 
 // Account Settings Sub-Screen
 function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
-  const { userProfile, updateUserProfile } = useAppContext();
-  
+  const { user, updateUserProfile } = useAppContext();
+
   // User profile fields
-  const [name, setName] = useState(userProfile.name);
-  const [email, setEmail] = useState(userProfile.email);
-  const [phone, setPhone] = useState(userProfile.phone);
+  const [name, setName] = useState(
+    `${user.firstName}` + ` ` + `${user.lastName}`
+  );
+  const [email, setEmail] = useState(user.email);
+  const [phone, setPhone] = useState(user.phoneNumber);
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   // Handle saving user profile
   const saveUserProfile = async () => {
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address');
+      Alert.alert("Invalid Email", "Please enter a valid email address");
       return;
     }
-    
+
     const success = await updateUserProfile({
       name,
       email,
-      phone
+      phone,
     });
-    
+
     if (success) {
-      Alert.alert('Success', 'Profile updated successfully');
+      Alert.alert("Success", "Profile updated successfully");
     } else {
-      Alert.alert('Error', 'Failed to update profile');
+      Alert.alert("Error", "Failed to update profile");
     }
   };
-  
+
   // Handle password reset
   const handleResetPassword = () => {
     // Validate password
     if (!currentPassword) {
-      Alert.alert('Error', 'Please enter your current password');
+      Alert.alert("Error", "Please enter your current password");
       return;
     }
-    
+
     if (newPassword.length < 8) {
-      Alert.alert('Error', 'New password must be at least 8 characters');
+      Alert.alert("Error", "New password must be at least 8 characters");
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
-    
+
     // In a real app, we would call an API to reset password
-    Alert.alert('Success', 'Password updated successfully');
+    Alert.alert("Success", "Password updated successfully");
     setShowResetPasswordModal(false);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.primary} />
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={24}
+            color={COLORS.primary}
+          />
         </TouchableOpacity>
         <Text style={styles.title}>Account Settings</Text>
       </View>
-      
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
           <SettingItem title="Full Name">
@@ -330,7 +361,7 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
               placeholder="Enter your name"
             />
           </SettingItem>
-          
+
           <SettingItem title="Email">
             <TextInput
               style={styles.input}
@@ -340,7 +371,7 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
               keyboardType="email-address"
             />
           </SettingItem>
-          
+
           <SettingItem title="Phone Number">
             <TextInput
               style={styles.input}
@@ -350,20 +381,23 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
               keyboardType="phone-pad"
             />
           </SettingItem>
-          
+
           <TouchableOpacity style={styles.saveButton} onPress={saveUserProfile}>
             <Text style={styles.saveButtonText}>Save Profile</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.saveButton, { backgroundColor: COLORS.secondary, marginTop: 24 }]} 
+
+          <TouchableOpacity
+            style={[
+              styles.saveButton,
+              { backgroundColor: COLORS.secondary, marginTop: 24 },
+            ]}
             onPress={() => setShowResetPasswordModal(true)}
           >
             <Text style={styles.saveButtonText}>Reset Password</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-      
+
       {/* Password Reset Modal */}
       <Modal
         visible={showResetPasswordModal}
@@ -373,7 +407,7 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Reset Password</Text>
-            
+
             <TextInput
               style={[styles.input, { marginVertical: 8 }]}
               value={currentPassword}
@@ -381,7 +415,7 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
               placeholder="Current Password"
               secureTextEntry
             />
-            
+
             <TextInput
               style={[styles.input, { marginVertical: 8 }]}
               value={newPassword}
@@ -389,7 +423,7 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
               placeholder="New Password"
               secureTextEntry
             />
-            
+
             <TextInput
               style={[styles.input, { marginVertical: 8 }]}
               value={confirmPassword}
@@ -397,16 +431,16 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
               placeholder="Confirm New Password"
               secureTextEntry
             />
-            
+
             <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelButton]} 
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowResetPasswordModal(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.confirmButton]} 
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
                 onPress={handleResetPassword}
               >
                 <Text style={styles.confirmButtonText}>Update Password</Text>
@@ -423,127 +457,149 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
 function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
   // In a real app, we would fetch payment methods from an API
   const [paymentMethods, setPaymentMethods] = useState([
-    { id: '1', type: 'credit_card', last4: '4242', brand: 'Visa', expMonth: 12, expYear: 2026, isDefault: true },
-    { id: '2', type: 'bank_account', last4: '6789', bankName: 'Chase', isDefault: false }
+    {
+      id: "1",
+      type: "credit_card",
+      last4: "4242",
+      brand: "Visa",
+      expMonth: 12,
+      expYear: 2026,
+      isDefault: true,
+    },
+    {
+      id: "2",
+      type: "bank_account",
+      last4: "6789",
+      bankName: "Chase",
+      isDefault: false,
+    },
   ]);
-  
+
   const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
-  const [cardholderName, setCardholderName] = useState('');
-  
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
+  const [cardholderName, setCardholderName] = useState("");
+
   // Add a new payment method
   const addPaymentMethod = () => {
     // Validate inputs
     if (cardNumber.length < 16) {
-      Alert.alert('Invalid Input', 'Please enter a valid card number');
+      Alert.alert("Invalid Input", "Please enter a valid card number");
       return;
     }
-    
+
     if (cardExpiry.length < 5) {
-      Alert.alert('Invalid Input', 'Please enter a valid expiry date (MM/YY)');
+      Alert.alert("Invalid Input", "Please enter a valid expiry date (MM/YY)");
       return;
     }
-    
+
     if (cardCvc.length < 3) {
-      Alert.alert('Invalid Input', 'Please enter a valid CVC');
+      Alert.alert("Invalid Input", "Please enter a valid CVC");
       return;
     }
-    
+
     if (!cardholderName) {
-      Alert.alert('Invalid Input', 'Please enter the cardholder name');
+      Alert.alert("Invalid Input", "Please enter the cardholder name");
       return;
     }
-    
+
     // In a real app, we would call an API to add a payment method
     const newPaymentMethod = {
       id: Date.now().toString(),
-      type: 'credit_card',
+      type: "credit_card",
       last4: cardNumber.slice(-4),
-      brand: 'Visa', // This would be determined by the API
-      expMonth: parseInt(cardExpiry.split('/')[0]),
-      expYear: parseInt('20' + cardExpiry.split('/')[1]),
-      isDefault: false
+      brand: "Visa", // This would be determined by the API
+      expMonth: parseInt(cardExpiry.split("/")[0]),
+      expYear: parseInt("20" + cardExpiry.split("/")[1]),
+      isDefault: false,
     };
-    
+
     setPaymentMethods([...paymentMethods, newPaymentMethod]);
     setShowAddPaymentModal(false);
-    
+
     // Reset form
-    setCardNumber('');
-    setCardExpiry('');
-    setCardCvc('');
-    setCardholderName('');
-    
-    Alert.alert('Success', 'Payment method added successfully');
+    setCardNumber("");
+    setCardExpiry("");
+    setCardCvc("");
+    setCardholderName("");
+
+    Alert.alert("Success", "Payment method added successfully");
   };
-    // Set a payment method as default
+  // Set a payment method as default
   const setDefaultPaymentMethod = (id: string) => {
-    setPaymentMethods(prevMethods => prevMethods.map(method => ({
-      ...method,
-      isDefault: method.id === id
-    })));
+    setPaymentMethods((prevMethods) =>
+      prevMethods.map((method) => ({
+        ...method,
+        isDefault: method.id === id,
+      }))
+    );
   };
-    // Remove a payment method
+  // Remove a payment method
   const removePaymentMethod = (id: string) => {
     Alert.alert(
-      'Remove Payment Method',
-      'Are you sure you want to remove this payment method?',
+      "Remove Payment Method",
+      "Are you sure you want to remove this payment method?",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Remove', 
-          style: 'destructive',
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
           onPress: () => {
-            setPaymentMethods(prevMethods => prevMethods.filter(method => method.id !== id));
-            Alert.alert('Success', 'Payment method removed');
-          }
-        }
+            setPaymentMethods((prevMethods) =>
+              prevMethods.filter((method) => method.id !== id)
+            );
+            Alert.alert("Success", "Payment method removed");
+          },
+        },
       ]
     );
   };
-    // Format card number with spaces
+  // Format card number with spaces
   const formatCardNumber = (text: string): string => {
-    const cleaned = text.replace(/\s+/g, '');
-    let formatted = '';
-    
+    const cleaned = text.replace(/\s+/g, "");
+    let formatted = "";
+
     for (let i = 0; i < cleaned.length; i++) {
       if (i > 0 && i % 4 === 0) {
-        formatted += ' ';
+        formatted += " ";
       }
       formatted += cleaned[i];
     }
-    
+
     return formatted;
   };
-    // Format card expiry with slash
+  // Format card expiry with slash
   const formatExpiry = (text: string): string => {
-    const cleaned = text.replace(/\D+/g, '');
+    const cleaned = text.replace(/\D+/g, "");
     if (cleaned.length <= 2) {
       return cleaned;
     }
     return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}`;
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.primary} />
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={24}
+            color={COLORS.primary}
+          />
         </TouchableOpacity>
         <Text style={styles.title}>Payment Methods</Text>
       </View>
-      
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
-          {paymentMethods.map(method => (
+          {paymentMethods.map((method) => (
             <View key={method.id} style={styles.paymentMethodItem}>
               <View style={styles.paymentMethodIcon}>
-                <MaterialCommunityIcons 
-                  name={method.type === 'credit_card' ? 'credit-card' : 'bank'} 
-                  size={24} 
-                  color={COLORS.primary} 
+                <MaterialCommunityIcons
+                  name={method.type === "credit_card" ? "credit-card" : "bank"}
+                  size={24}
+                  color={COLORS.primary}
                 />
                 {method.isDefault && (
                   <View style={styles.defaultBadge}>
@@ -551,51 +607,64 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
                   </View>
                 )}
               </View>
-              
+
               <View style={styles.paymentMethodDetails}>
-                {method.type === 'credit_card' ? (
+                {method.type === "credit_card" ? (
                   <>
-                    <Text style={styles.paymentMethodTitle}>{method.brand} •••• {method.last4}</Text>
+                    <Text style={styles.paymentMethodTitle}>
+                      {method.brand} •••• {method.last4}
+                    </Text>
                     <Text style={styles.paymentMethodSubtitle}>
                       Expires {method.expMonth}/{method.expYear}
                     </Text>
-                  </>                ) : (
+                  </>
+                ) : (
                   <>
-                    <Text style={styles.paymentMethodTitle}>{method.bankName} •••• {method.last4}</Text>
-                    <Text style={styles.paymentMethodSubtitle}>Bank Account</Text>
+                    <Text style={styles.paymentMethodTitle}>
+                      {method.bankName} •••• {method.last4}
+                    </Text>
+                    <Text style={styles.paymentMethodSubtitle}>
+                      Bank Account
+                    </Text>
                   </>
                 )}
               </View>
-              
+
               <View style={styles.paymentMethodActions}>
                 {!method.isDefault && (
                   <TouchableOpacity
                     style={styles.paymentMethodAction}
                     onPress={() => setDefaultPaymentMethod(method.id)}
                   >
-                    <Text style={styles.paymentMethodActionText}>Set Default</Text>
+                    <Text style={styles.paymentMethodActionText}>
+                      Set Default
+                    </Text>
                   </TouchableOpacity>
                 )}
-                
+
                 <TouchableOpacity
                   style={[styles.paymentMethodAction, { marginLeft: 8 }]}
                   onPress={() => removePaymentMethod(method.id)}
                 >
-                  <MaterialCommunityIcons name="delete" size={20} color={COLORS.danger} />
+                  <MaterialCommunityIcons
+                    name="delete"
+                    size={20}
+                    color={COLORS.danger}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
           ))}
-          
-          <TouchableOpacity 
-            style={[styles.saveButton, { marginTop: 16 }]} 
+
+          <TouchableOpacity
+            style={[styles.saveButton, { marginTop: 16 }]}
             onPress={() => setShowAddPaymentModal(true)}
           >
             <Text style={styles.saveButtonText}>Add Payment Method</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-      
+
       {/* Add Payment Method Modal */}
       <Modal
         visible={showAddPaymentModal}
@@ -603,20 +672,20 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
         animationType="fade"
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { width: '90%' }]}>
+          <View style={[styles.modalContent, { width: "90%" }]}>
             <Text style={styles.modalTitle}>Add Payment Method</Text>
-            
+
             <TextInput
               style={[styles.input, { marginVertical: 8 }]}
               value={cardholderName}
               onChangeText={setCardholderName}
               placeholder="Cardholder Name"
             />
-              <TextInput
+            <TextInput
               style={[styles.input, { marginVertical: 8 }]}
               value={cardNumber}
               onChangeText={(text) => {
-                if (text.replace(/\s+/g, '').length <= 16) {
+                if (text.replace(/\s+/g, "").length <= 16) {
                   setCardNumber(formatCardNumber(text));
                 }
               }}
@@ -624,12 +693,17 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
               keyboardType="numeric"
               maxLength={19} // 16 digits + 3 spaces
             />
-            
-            <View style={{ flexDirection: 'row' }}>              <TextInput
-                style={[styles.input, { marginVertical: 8, flex: 1, marginRight: 8 }]}
+
+            <View style={{ flexDirection: "row" }}>
+              {" "}
+              <TextInput
+                style={[
+                  styles.input,
+                  { marginVertical: 8, flex: 1, marginRight: 8 },
+                ]}
                 value={cardExpiry}
                 onChangeText={(text) => {
-                  if (text.replace(/\D+/g, '').length <= 4) {
+                  if (text.replace(/\D+/g, "").length <= 4) {
                     setCardExpiry(formatExpiry(text));
                   }
                 }}
@@ -637,7 +711,7 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
                 keyboardType="numeric"
                 maxLength={5} // MM/YY
               />
-                <TextInput
+              <TextInput
                 style={[styles.input, { marginVertical: 8, flex: 1 }]}
                 value={cardCvc}
                 onChangeText={(text) => {
@@ -651,16 +725,16 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
                 secureTextEntry
               />
             </View>
-            
+
             <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelButton]} 
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowAddPaymentModal(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.confirmButton]} 
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
                 onPress={addPaymentMethod}
               >
                 <Text style={styles.confirmButtonText}>Add Payment Method</Text>
@@ -676,42 +750,42 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
 // Main Settings Screen
 export default function SettingsScreen() {
   const router = useRouter();
-  const { userProfile, logout } = useAppContext();
-  const [activeScreen, setActiveScreen] = useState('main');
+  const { user, logout } = useAppContext();
+  const [activeScreen, setActiveScreen] = useState("main");
   const [showSignOutModal, setShowSignOutModal] = useState(false);
-    // Navigate to sub-screens
+  // Navigate to sub-screens
   const navigateToScreen = (screen: string) => {
     setActiveScreen(screen);
   };
-  
+
   // Handle back button
   const handleBack = () => {
-    setActiveScreen('main');
+    setActiveScreen("main");
   };
-  
+
   // Handle sign out
   const handleSignOut = async () => {
     try {
       await logout(); // Use the logout function from AppContext
       setShowSignOutModal(false);
-      router.replace('/login');
+      router.replace("/login");
     } catch (error) {
-      console.error('Error during logout:', error);
-      Alert.alert('Error', 'Failed to sign out. Please try again.');
+      console.error("Error during logout:", error);
+      Alert.alert("Error", "Failed to sign out. Please try again.");
     }
   };
-  
+
   // Render different screens based on navigation state
   switch (activeScreen) {
-    case 'tankSettings':
+    case "tankSettings":
       return <TankSettingsScreen onBack={handleBack} />;
-    case 'orderSettings':
+    case "orderSettings":
       return <OrderSettingsScreen onBack={handleBack} />;
-    case 'notificationSettings':
+    case "notificationSettings":
       return <NotificationSettingsScreen onBack={handleBack} />;
-    case 'accountSettings':
+    case "accountSettings":
       return <AccountSettingsScreen onBack={handleBack} />;
-    case 'paymentSettings':
+    case "paymentSettings":
       return <PaymentSettingsScreen onBack={handleBack} />;
     default:
       // Main settings menu
@@ -721,100 +795,162 @@ export default function SettingsScreen() {
           <View style={styles.header}>
             <Text style={styles.title}>Settings</Text>
           </View>
-          
+
           <ScrollView style={styles.scrollView}>
             {/* Tank Settings */}
-            <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => navigateToScreen('tankSettings')}
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigateToScreen("tankSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons name="water-pump" size={24} color={COLORS.primary} style={styles.menuIcon} />
+                <MaterialCommunityIcons
+                  name="water-pump"
+                  size={24}
+                  color={COLORS.primary}
+                  style={styles.menuIcon}
+                />
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Tank Settings</Text>
-                  <Text style={styles.menuItemDescription}>Size, usage, threshold</Text>
+                  <Text style={styles.menuItemDescription}>
+                    Size, usage, threshold
+                  </Text>
                 </View>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.gray} />
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color={COLORS.gray}
+              />
             </TouchableOpacity>
-            
+
             {/* Order Settings */}
-            <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => navigateToScreen('orderSettings')}
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigateToScreen("orderSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons name="truck-delivery" size={24} color={COLORS.primary} style={styles.menuIcon} />
+                <MaterialCommunityIcons
+                  name="truck-delivery"
+                  size={24}
+                  color={COLORS.primary}
+                  style={styles.menuIcon}
+                />
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Order Settings</Text>
-                  <Text style={styles.menuItemDescription}>Auto-order, preferred supplier</Text>
+                  <Text style={styles.menuItemDescription}>
+                    Auto-order, preferred supplier
+                  </Text>
                 </View>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.gray} />
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color={COLORS.gray}
+              />
             </TouchableOpacity>
-            
+
             {/* Notification Settings */}
-            <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => navigateToScreen('notificationSettings')}
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigateToScreen("notificationSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons name="bell" size={24} color={COLORS.primary} style={styles.menuIcon} />
+                <MaterialCommunityIcons
+                  name="bell"
+                  size={24}
+                  color={COLORS.primary}
+                  style={styles.menuIcon}
+                />
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Notifications</Text>
-                  <Text style={styles.menuItemDescription}>Push, SMS, email</Text>
+                  <Text style={styles.menuItemDescription}>
+                    Push, SMS, email
+                  </Text>
                 </View>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.gray} />
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color={COLORS.gray}
+              />
             </TouchableOpacity>
-            
+
             {/* Account Settings */}
-            <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => navigateToScreen('accountSettings')}
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigateToScreen("accountSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons name="account" size={24} color={COLORS.primary} style={styles.menuIcon} />
+                <MaterialCommunityIcons
+                  name="account"
+                  size={24}
+                  color={COLORS.primary}
+                  style={styles.menuIcon}
+                />
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Account</Text>
-                  <Text style={styles.menuItemDescription}>{userProfile.name} • {userProfile.email}</Text>
+                  <Text style={styles.menuItemDescription}>
+                    {/* {user.firstName} • {user.lastName} • {user.email} */}
+                  </Text>
                 </View>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.gray} />
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color={COLORS.gray}
+              />
             </TouchableOpacity>
-            
+
             {/* Payment Settings */}
-            <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => navigateToScreen('paymentSettings')}
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigateToScreen("paymentSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons name="credit-card" size={24} color={COLORS.primary} style={styles.menuIcon} />
+                <MaterialCommunityIcons
+                  name="credit-card"
+                  size={24}
+                  color={COLORS.primary}
+                  style={styles.menuIcon}
+                />
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Payment Methods</Text>
-                  <Text style={styles.menuItemDescription}>Manage payment options</Text>
+                  <Text style={styles.menuItemDescription}>
+                    Manage payment options
+                  </Text>
                 </View>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.gray} />
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color={COLORS.gray}
+              />
             </TouchableOpacity>
-            
+
             {/* Sign Out */}
-            <TouchableOpacity 
-              style={[styles.menuItem, styles.signOutButton]} 
+            <TouchableOpacity
+              style={[styles.menuItem, styles.signOutButton]}
               onPress={() => setShowSignOutModal(true)}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons name="logout" size={24} color={COLORS.danger} style={styles.menuIcon} />
-                <Text style={[styles.menuItemTitle, { color: COLORS.danger }]}>Sign Out</Text>
+                <MaterialCommunityIcons
+                  name="logout"
+                  size={24}
+                  color={COLORS.danger}
+                  style={styles.menuIcon}
+                />
+                <Text style={[styles.menuItemTitle, { color: COLORS.danger }]}>
+                  Sign Out
+                </Text>
               </View>
             </TouchableOpacity>
-            
+
             <View style={styles.appInfo}>
               <Text style={styles.appVersion}>Water Tank Monitor v1.0.0</Text>
               <Text style={styles.appCopyright}>© 2025 Water Monitor Inc.</Text>
             </View>
           </ScrollView>
-          
+
           {/* Sign Out Confirmation Modal */}
           <Modal
             visible={showSignOutModal}
@@ -824,15 +960,18 @@ export default function SettingsScreen() {
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>Sign Out</Text>
-                <Text style={styles.modalText}>Are you sure you want to sign out?</Text>
+                <Text style={styles.modalText}>
+                  Are you sure you want to sign out?
+                </Text>
                 <View style={styles.modalButtons}>
-                  <TouchableOpacity 
-                    style={[styles.modalButton, styles.cancelButton]} 
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
                     onPress={() => setShowSignOutModal(false)}
                   >
                     <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>                  <TouchableOpacity 
-                    style={[styles.modalButton, styles.confirmButton]} 
+                  </TouchableOpacity>{" "}
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.confirmButton]}
                     onPress={handleSignOut}
                   >
                     <Text style={styles.confirmButtonText}>Sign Out</Text>
@@ -855,15 +994,15 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 60,
     backgroundColor: COLORS.white,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   backButton: {
     marginRight: 16,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
   },
   scrollView: {
@@ -875,13 +1014,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 12,
     color: COLORS.text,
   },
   inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   input: {
     flex: 1,
@@ -907,12 +1046,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingVertical: 12,
     borderRadius: 4,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   saveButtonText: {
     color: COLORS.white,
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 16,
   },
   // Menu items for main settings screen
@@ -922,9 +1061,9 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -932,8 +1071,8 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   menuItemContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   menuIcon: {
@@ -944,7 +1083,7 @@ const styles = StyleSheet.create({
   },
   menuItemTitle: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     color: COLORS.text,
     marginBottom: 4,
   },
@@ -959,19 +1098,19 @@ const styles = StyleSheet.create({
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
     backgroundColor: COLORS.white,
     borderRadius: 8,
     padding: 24,
-    width: '80%',
+    width: "80%",
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
     color: COLORS.text,
   },
@@ -981,8 +1120,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
   modalButton: {
     paddingVertical: 8,
@@ -995,14 +1134,14 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: COLORS.text,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   confirmButton: {
     backgroundColor: COLORS.primary,
   },
   confirmButtonText: {
     color: COLORS.white,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   // Payment method styles
   paymentMethodItem: {
@@ -1010,8 +1149,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -1023,13 +1162,13 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: COLORS.lightGray,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
-    position: 'relative',
+    position: "relative",
   },
   defaultBadge: {
-    position: 'absolute',
+    position: "absolute",
     bottom: -5,
     right: -5,
     backgroundColor: COLORS.success,
@@ -1040,14 +1179,14 @@ const styles = StyleSheet.create({
   defaultBadgeText: {
     color: COLORS.white,
     fontSize: 8,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   paymentMethodDetails: {
     flex: 1,
   },
   paymentMethodTitle: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     color: COLORS.text,
   },
   paymentMethodSubtitle: {
@@ -1055,8 +1194,8 @@ const styles = StyleSheet.create({
     color: COLORS.gray,
   },
   paymentMethodActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   paymentMethodAction: {
     padding: 8,
@@ -1066,7 +1205,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   appInfo: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 24,
     paddingBottom: 40,
   },

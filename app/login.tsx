@@ -1,14 +1,14 @@
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAppContext } from "../AppContext";
 import { COLORS } from "../constants";
@@ -16,16 +16,15 @@ import { COLORS } from "../constants";
 export default function LoginScreen() {
   const router = useRouter();
   const context = useAppContext();
-  
-  // Handle undefined context
+
   if (!context) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading authentication...</Text>
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
-  
+
   const { login } = context;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,7 +51,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login({ email, password });
-      router.replace("/home"); // Use proper route instead of "/(tabs)"
+      router.replace("/(tabs)"); // Use proper route instead of "/(tabs)"
     } catch (error) {
       Alert.alert(
         "Login Failed",

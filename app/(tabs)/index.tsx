@@ -1,10 +1,10 @@
+import { useAppContext } from '@/AppContext';
+import { CircularProgressIndicator } from '@/components';
+import { calculateDaysRemaining, COLORS, formatDate } from '@/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
-import { useAppContext } from '../AppContext';
-import { CircularProgressIndicator } from '../components';
-import { calculateDaysRemaining, COLORS, formatDate } from '../constants';
 
 export default function HomeScreen() {
   const router = useRouter();

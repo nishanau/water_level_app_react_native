@@ -1,3 +1,6 @@
+import { useAppContext } from "@/AppContext";
+import { OrderItem } from "@/components";
+import { COLORS } from "@/constants";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
@@ -11,19 +14,29 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAppContext } from "../AppContext";
-import { OrderItem } from "../components";
-import { COLORS } from "../constants";
 
 // Define interfaces for our data types
 interface Order {
-  id: string;
-  date: string;
+  _id: string;
+  orderNumber: string;
+  userId: string;
+  tankId: string;
+  supplierId: string;
+  orderDate: string;
+  scheduledDeliveryDate: string;
   status: string;
-  amount: number;
+  statusHistory: {
+    status: string;
+    timestamp: string;
+    notes: string;
+    _id: string;
+  }[];
+  quantity: number;
   price: number;
-  deliveryDate: string;
-  invoice: string;
+  paymentStatus: string;
+  deliveryNotes: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface DateTimePickerEvent {
@@ -46,12 +59,14 @@ export default function OrdersScreen() {
   // Filter orders by status
   const upcomingOrders = orders.filter(
     (order: Order) =>
-      order.status === "Scheduled" || order.status === "In Transit"
+      order.status === "placed" ||
+      order.status === "accepted" ||
+      order.status === "in_transit"
   );
 
   const pastOrders = orders.filter(
     (order: Order) =>
-      order.status === "Delivered" || order.status === "Cancelled"
+      order.status === "delivered" || order.status === "cancelled"
   );
 
   // Show cancel confirmation modal
@@ -71,7 +86,7 @@ export default function OrdersScreen() {
   // Handle order rescheduling
   const handleReschedule = (order: Order): void => {
     setSelectedOrder(order);
-    const date = new Date(order.deliveryDate);
+    const date = new Date(order.scheduledDeliveryDate);
     setSelectedDate(date);
     setDatePickerVisible(true);
   };
@@ -141,8 +156,16 @@ export default function OrdersScreen() {
               {upcomingOrders.length > 0 ? (
                 upcomingOrders.map((order: Order) => (
                   <OrderItem
-                    key={order.id}
-                    order={order}
+                    key={order._id}
+                    order={{
+                      id: order.orderNumber,
+                      date: order.orderDate,
+                      status: order.status,
+                      amount: order.quantity,
+                      price: order.price,
+                      deliveryDate: order.scheduledDeliveryDate,
+                      invoice: order.orderNumber,
+                    }}
                     onCancel={showCancelConfirmation}
                     onReschedule={handleReschedule}
                   />
@@ -168,8 +191,16 @@ export default function OrdersScreen() {
               {pastOrders.length > 0 ? (
                 pastOrders.map((order: Order) => (
                   <OrderItem
-                    key={order.id}
-                    order={order}
+                    key={order._id}
+                    order={{
+                      id: order.orderNumber,
+                      date: order.orderDate,
+                      status: order.status,
+                      amount: order.quantity,
+                      price: order.price,
+                      deliveryDate: order.scheduledDeliveryDate,
+                      invoice: order.orderNumber,
+                    }}
                     onCancel={undefined}
                     onReschedule={undefined}
                   />
@@ -248,7 +279,6 @@ export default function OrdersScreen() {
         animationType="fade"
         transparent={true}
       >
-        
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Cancel Order</Text>
@@ -331,7 +361,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.gray,
     marginTop: 4,
-  },  // Modal styles
+  }, // Modal styles
   modalContainer: {
     flex: 1,
     justifyContent: "center",

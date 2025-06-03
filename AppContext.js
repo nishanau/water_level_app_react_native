@@ -15,7 +15,7 @@ export function AppProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   // App state
-  const [waterLevel, setWaterLevel] = useState(0);
+  const [waterLevel, setWaterLevel] = useState(50);
   const [tankSize, setTankSize] = useState(0);
   const [avgDailyUsage, setAvgDailyUsage] = useState(0);
   const [nextDelivery, setNextDelivery] = useState(null);
@@ -34,13 +34,20 @@ export function AppProvider({ children }) {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      loadUserData();
+    }
+  }, [user]);
   // Authentication methods
   const checkAuth = async () => {
     try {
       const { token, user } = await authService.checkAuth();
-      if (token) {
+
+      if (token && user) {
         setUser(user);
         setIsAuthenticated(true);
+        console.log("Loading user data...", user);
         await loadUserData();
       }
     } catch (error) {
@@ -55,7 +62,7 @@ export function AppProvider({ children }) {
       const response = await authService.login(credentials);
       setUser(response.user);
       setIsAuthenticated(true);
-      await loadUserData();
+      // await loadUserData();
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -82,9 +89,11 @@ export function AppProvider({ children }) {
   // Load user's data from API
   const loadUserData = async () => {
     try {
-      const tank = await tankService.getTankData();
+      console.log("Loading user data in loading method...", user);
+      console.log("tankIds:", user.tankIds[0]);
+      const tank = await tankService.getTankData(user.tankIds[0]);
       setTankSize(tank.capacity);
-      setWaterLevel(tank.currentLevel);
+      //  setWaterLevel(tank.currentLevel);
       setAvgDailyUsage(tank.avgDailyUsage);
       setAutoOrder(tank.autoOrder);
       setLowWaterThreshold(tank.lowWaterThreshold);
@@ -94,9 +103,14 @@ export function AppProvider({ children }) {
 
       const notifications = await notificationService.getNotifications();
       setNotifications(notifications);
-
-      const preferences = tank.notificationPreferences;
-      setNotificationPreferences(preferences);
+      console.log("Notification Preferences:", user.notificationPreferences);
+      setNotificationPreferences(
+        user.notificationPreferences || {
+          push: true,
+          sms: false,
+          email: true,
+        }
+      );
     } catch (error) {
       console.error("Failed to load user data:", error);
     }
@@ -168,7 +182,7 @@ export function AppProvider({ children }) {
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
-    console.warn('useAppContext must be used within an AppProvider');
+    console.warn("useAppContext must be used within an AppProvider");
   }
   return context;
 };

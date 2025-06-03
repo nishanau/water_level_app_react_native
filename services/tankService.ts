@@ -1,20 +1,17 @@
-import axios from 'axios';
+import apiService from "./apiService";
 
-const API_URL = 'http://your-api-url/api';
-
-const api = axios.create({
-  baseURL: API_URL,
-  timeout: 5000,
-});
+const api = apiService.getAxiosInstance();
 
 class TankService {
-  async getTankData() {
-    const response = await api.get('/tanks/current');
+  async getTankData(tankId : string) {
+   
+    const response = await api.get(`/tanks/${tankId}`);
+    console.log("Tank data response:", response.data);
     return response.data;
   }
 
   async saveTankSettings(settings) {
-    await api.patch('/tanks/settings', settings);
+    await api.patch("/tanks/settings", settings);
   }
 }
 

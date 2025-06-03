@@ -45,7 +45,7 @@ function RootLayoutNav() {
 
     if (isAuthenticated && isAuthRoute) {
       // Redirect to home if authenticated and trying to access auth screens
-      router.replace("/");
+      router.replace("/(tabs)");
     } else if (
       !isAuthenticated &&
       segments[0] !== "login" &&
@@ -75,7 +75,7 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="login" />
       <Stack.Screen name="register" />
-      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
   );
 }
