@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosInstance } from "axios";
 
-const API_URL = "http://192.168.76.68:3000/api"; // Replace with your actual API URL
-//const API_URL = "http://192.168.101.94:3000/api"
+// const API_URL = "http://192.168.76.68:3000/api"; // Replace with your actual API URL
+const API_URL = "http://192.168.101.94:3000/api"
 
 class ApiService {
   private api: AxiosInstance;

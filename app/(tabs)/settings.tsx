@@ -2,9 +2,11 @@ import { useAppContext } from "@/AppContext";
 import { SettingItem } from "@/components";
 import { COLORS } from "@/constants";
 import apiService from "@/services/apiService";
+import supplierService from "@/services/supplierService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 import { Stack, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
@@ -146,21 +148,64 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
 
 // Order Settings Sub-Screen
 function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
-  const { autoOrder, preferredSupplier, saveSettings } = useAppContext();
+  interface Supplier {
+    id: string;
+    company: string;
+  }
+  const {
+    autoOrder,
+    preferredSupplier,
+    setPreferredSupplier,
+    setAutoOrder,
+    user,
+  } = useAppContext();
 
+  const [supplierList, setSupplierList] = useState<
+    { id: string; companyName: string }[]
+  >([]);
   // Local state to track changes
   const [localAutoOrder, setLocalAutoOrder] = useState(autoOrder);
   const [localPreferredSupplier, setLocalPreferredSupplier] =
     useState(preferredSupplier);
 
-  // Handle saving order settings
-  const saveOrderSettings = () => {
-    saveSettings({
-      autoOrder: localAutoOrder,
-      preferredSupplier: localPreferredSupplier,
-    });
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      const suppliers = await supplierService.getSuppliers();
+      const formattedSuppliers = suppliers.map((supplier) => ({
+        id: supplier._id,
+        companyName: supplier.company,
+      }));
 
-    Alert.alert("Success", "Order settings saved successfully");
+      setSupplierList(formattedSuppliers);
+    };
+
+    fetchSuppliers();
+  }, []);
+
+  // Handle savin g order settings
+  const saveOrderSettings = async () => {
+    if (
+      localPreferredSupplier === "" ||
+      localAutoOrder === "" ||
+      localAutoOrder === null ||
+      localPreferredSupplier === null
+    ) {
+      Alert.alert("Missing Fields", "Please select a preferred supplier");
+      return;
+    }
+    try {
+      await apiService.patchFields("users", user.id, {
+        autoOrder: localAutoOrder,
+        preferredSupplier: localPreferredSupplier,
+      });
+      // This code only runs if no error was thrown
+      setAutoOrder(localAutoOrder);
+      setPreferredSupplier(localPreferredSupplier);
+      Alert.alert("Success", "Order settings saved successfully");
+    } catch (error) {
+      // This code runs when patchFields throws an error
+      Alert.alert("Error", error.message);
+    }
   };
 
   return (
@@ -188,12 +233,29 @@ function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
           </SettingItem>
 
           <SettingItem title="Preferred Supplier">
-            <TextInput
-              style={styles.input}
-              value={localPreferredSupplier}
-              onChangeText={setLocalPreferredSupplier}
-              placeholder="Enter supplier name"
-            />
+            <View style={styles.dropdownContainer}>
+              <Picker
+                selectedValue={localPreferredSupplier}
+                onValueChange={(itemValue) =>
+                  setLocalPreferredSupplier(itemValue)
+                }
+                style={[styles.dropdown, styles.dropdownText]}
+              >
+                <Picker.Item
+                  label="Select Supplier"
+                  value=""
+                  style={styles.dropdownPlaceholder}
+                />
+                {supplierList.map((supplier) => (
+                  <Picker.Item
+                    key={supplier.id}
+                    label={supplier.companyName}
+                    value={supplier.id}
+                    style={styles.dropdownText}
+                  />
+                ))}
+              </Picker>
+            </View>
           </SettingItem>
 
           <TouchableOpacity
@@ -210,7 +272,7 @@ function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
 
 // Notification Settings Sub-Screen
 function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
-  const { notificationPreferences, saveSettings } = useAppContext();
+  const { notificationPreferences } = useAppContext();
 
   // Local state to track changes
   const [localNotifications, setLocalNotifications] = useState({
@@ -226,10 +288,6 @@ function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
 
   // Handle saving notification preferences
   const saveNotificationSettings = () => {
-    saveSettings({
-      notificationPreferences: localNotifications,
-    });
-
     Alert.alert("Success", "Notification settings saved successfully");
   };
 
@@ -1051,6 +1109,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.gray,
     width: 80,
+  },
+  dropdown: {
+    height: 50,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+  dropdownContainer: {
+    marginVertical: 8,
+    width: "90%",
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  dropdownPlaceholder: {
+    color: COLORS.gray,
   },
   helperText: {
     fontSize: 12,

@@ -35,6 +35,7 @@ export function AppProvider({ children }) {
     sms: false,
     email: true,
   });
+  const [preferredSupplier, setPreferredSupplier] = useState("");
 
   // Refs to handle race conditions
   const isMounted = useRef(true);
@@ -103,11 +104,13 @@ export function AppProvider({ children }) {
 
       // Only update state if component is still mounted
       if (isMounted.current) {
+
         setTankSize(tank.capacity || 0);
         setAvgDailyUsage(tank.avgDailyUsage || 0);
         setAutoOrder(user.autoOrder);
         setLowWaterThreshold(tank.lowWaterThreshold || 20);
         setOrders(orders || []);
+        setPreferredSupplier(user.preferredSupplier );
 
         setNotificationPreferences(
           user.notificationPreferences || {
@@ -190,25 +193,6 @@ export function AppProvider({ children }) {
     setOrders([]);
   }, []);
 
-  // API methods with better error handling
-  const saveSettings = useCallback(
-    async (settings) => {
-      try {
-        await tankService.saveTankSettings(settings);
-        await loadUserData();
-        return true;
-      } catch (error) {
-        console.error("Failed to save settings:", error);
-        Alert.alert(
-          "Settings Error",
-          "Failed to save your settings. Please try again."
-        );
-        return false;
-      }
-    },
-    [loadUserData]
-  );
-
   const placeOrder = useCallback(async () => {
     try {
       const order = await orderService.placeOrder();
@@ -270,10 +254,10 @@ export function AppProvider({ children }) {
     notifications,
     orders,
     notificationPreferences,
+    preferredSupplier,
 
     // Methods
     setAutoOrder,
-    saveSettings,
     placeOrder,
     cancelOrder,
     refreshUserData,
@@ -283,6 +267,7 @@ export function AppProvider({ children }) {
     setTankSize,
     setAvgDailyUsage,
     setLowWaterThreshold,
+    setPreferredSupplier,
   };
 
   return (
