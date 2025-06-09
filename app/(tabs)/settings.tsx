@@ -2,11 +2,11 @@ import { useAppContext } from "@/AppContext";
 import { SettingItem } from "@/components";
 import { COLORS } from "@/constants";
 import apiService from "@/services/apiService";
-import supplierService from "@/services/supplierService";
+import authService from "@/services/authService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { Stack, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   Modal,
@@ -19,7 +19,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 // Tank Settings Sub-Screen
 function TankSettingsScreen({ onBack }: { onBack: () => void }) {
   const {
@@ -148,39 +147,19 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
 
 // Order Settings Sub-Screen
 function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
-  interface Supplier {
-    id: string;
-    company: string;
-  }
   const {
     autoOrder,
     preferredSupplier,
     setPreferredSupplier,
     setAutoOrder,
     user,
+    suppliers,
   } = useAppContext();
 
-  const [supplierList, setSupplierList] = useState<
-    { id: string; companyName: string }[]
-  >([]);
   // Local state to track changes
   const [localAutoOrder, setLocalAutoOrder] = useState(autoOrder);
   const [localPreferredSupplier, setLocalPreferredSupplier] =
     useState(preferredSupplier);
-
-  useEffect(() => {
-    const fetchSuppliers = async () => {
-      const suppliers = await supplierService.getSuppliers();
-      const formattedSuppliers = suppliers.map((supplier) => ({
-        id: supplier._id,
-        companyName: supplier.company,
-      }));
-
-      setSupplierList(formattedSuppliers);
-    };
-
-    fetchSuppliers();
-  }, []);
 
   // Handle savin g order settings
   const saveOrderSettings = async () => {
@@ -202,7 +181,7 @@ function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
       setAutoOrder(localAutoOrder);
       setPreferredSupplier(localPreferredSupplier);
       Alert.alert("Success", "Order settings saved successfully");
-    } catch (error) {
+    } catch (error: any) {
       // This code runs when patchFields throws an error
       Alert.alert("Error", error.message);
     }
@@ -246,11 +225,11 @@ function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
                   value=""
                   style={styles.dropdownPlaceholder}
                 />
-                {supplierList.map((supplier) => (
+                {suppliers.map((supplier: any) => (
                   <Picker.Item
-                    key={supplier.id}
-                    label={supplier.companyName}
-                    value={supplier.id}
+                    key={supplier._id}
+                    label={supplier.company}
+                    value={supplier._id}
                     style={styles.dropdownText}
                   />
                 ))}
@@ -349,7 +328,7 @@ function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
 
 // Account Settings Sub-Screen
 function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
-  const { user, updateUserProfile } = useAppContext();
+  const { user } = useAppContext();
 
   // User profile fields
   const [name, setName] = useState(
@@ -364,28 +343,38 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
 
   // Handle saving user profile
   const saveUserProfile = async () => {
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert("Invalid Email", "Please enter a valid email address");
-      return;
-    }
+    try {
+      // Validate email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        Alert.alert("Invalid Email", "Please enter a valid email address");
+        return;
+      }
+      const firstName = name.trim().split(" ")[0];
+      const lastName = name.trim().split(" ")[1];
 
-    const success = await updateUserProfile({
-      name,
-      email,
-      phone,
-    });
+      await apiService.patchFields("users", user.id, {
+        firstName,
+        lastName,
+        email,
+        phoneNumber: phone,
+      });
 
-    if (success) {
+      // If we reach here, it means the request was successful
       Alert.alert("Success", "Profile updated successfully");
-    } else {
-      Alert.alert("Error", "Failed to update profile");
+    } catch (error) {
+      // Handle different error types from backend
+      let message = "Failed to update profile";
+      if (typeof error === "object" && error !== null && "response" in error) {
+        const err = error as { response?: { data?: { message?: string } } };
+        message = err.response?.data?.message || message;
+      }
+      Alert.alert("Error", message);
     }
   };
 
   // Handle password reset
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     // Validate password
     if (!currentPassword) {
       Alert.alert("Error", "Please enter your current password");
@@ -400,6 +389,20 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
     if (newPassword !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
       return;
+    }
+
+    try {
+      const isValid = await authService.checkPassword(user.id, currentPassword);
+      if (!isValid) {
+        Alert.alert("Error", "Current password is incorrect");
+        return;
+      }
+
+      await apiService.patchFields("users", user.id, {
+        password: newPassword,
+      });
+    } catch {
+      Alert.alert("Error", "Unable to reset password. Please try again.");
     }
 
     // In a real app, we would call an API to reset password

@@ -4,17 +4,28 @@ const api = apiService.getAxiosInstance();
 
 class OrderService {
   async getOrders() {
-    const response = await api.get("/orders");
+    try {
+      const response = await api.get("/orders");
 
-    return response.data;
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      throw error;
+    }
   }
 
-  async placeOrder() {
-    const response = await api.post("/orders");
-    return response.data;
+  async placeOrder(orderData) {
+    try {
+      const response = await api.post("/orders", { ...orderData });
+      console.log("Order placed successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error placing order:", error);
+      throw error;
+    }
   }
 
-  async cancelOrder(orderId) {
+  async cancelOrder(orderId:string) {
     await api.patch(`/orders/${orderId}/cancel`);
   }
 }

@@ -108,7 +108,7 @@ export const OrderItem = ({ order, onCancel, onReschedule }) => {
   return (
     <View style={styles.orderItem}>
       <View style={styles.orderHeader}>
-        <Text style={styles.orderId}>{order.id}</Text>
+        <Text style={styles.orderId}>{order.name}</Text>
         <View
           style={[
             styles.statusBadge,
@@ -123,10 +123,12 @@ export const OrderItem = ({ order, onCancel, onReschedule }) => {
         <Text style={styles.orderDate}>
           Order Date: {new Date(order.date).toLocaleDateString()}
         </Text>
-        {order.deliveryDate && (
+        {order.deliveryDate ? (
           <Text style={styles.deliveryDate}>
             Delivery: {new Date(order.deliveryDate).toLocaleDateString()}
           </Text>
+        ) : (
+          <Text style={styles.deliveryDate}>Delivery: Not Scheduled</Text>
         )}
         <Text style={styles.orderAmount}>
           Amount: {order.amount} L • ${order.price.toFixed(2)}

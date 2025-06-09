@@ -47,10 +47,11 @@ class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       const response = await this.api.post("/auth/login", credentials);
-      const { access_token, user } = response.data;
-
+      const { access_token, user, refresh_token } = response.data;
+      console.log("Login response:", response.data);
       await AsyncStorage.setItem("userToken", access_token);
       await AsyncStorage.setItem("userData", JSON.stringify(user));
+      await AsyncStorage.setItem("refresh_token", refresh_token);
 
       return response.data;
     } catch (error: any) {
@@ -65,20 +66,65 @@ class AuthService {
     } finally {
       await AsyncStorage.removeItem("userToken");
       await AsyncStorage.removeItem("userData");
+      await AsyncStorage.removeItem("refresh_token");
+    }
+  }
+
+  async fetchUserData(): Promise<any> {
+    try {
+      const response = await this.api.get("/users/me");
+      const userData = response.data;
+
+      // Update AsyncStorage with fresh data
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+
+      return userData;
+    } catch (error: any) {
+      console.error("Failed to fetch user data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch user data"
+      );
     }
   }
 
   async checkAuth(): Promise<{ token: string | null; user: any | null }> {
     try {
       const token = await AsyncStorage.getItem("userToken");
-      const userData = await AsyncStorage.getItem("userData");
+      if (!token) {
+        return { token: null, user: null };
+      }
 
-      return {
-        token,
-        user: userData ? JSON.parse(userData) : null,
-      };
+      const userData = await AsyncStorage.getItem("userData");
+      let user = null;
+      if (userData) {
+        try {
+          user = JSON.parse(userData);
+        } catch (e) {
+          console.error("Error parsing user data:", e);
+        }
+      }
+      // Fetch fresh user data instead of reading from storage
+      //const user = await this.fetchUserData();
+
+      return { token, user };
     } catch (error) {
+      console.error("Auth check failed:", error);
       return { token: null, user: null };
+    }
+  }
+
+  async checkPassword(userId: string, password: string): Promise<boolean> {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) return false;
+
+      const response = await this.api.post("/auth/check-password", {
+        password,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error("Check password error:", error.message);
+      return false;
     }
   }
 

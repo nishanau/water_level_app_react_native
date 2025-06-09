@@ -1,3 +1,4 @@
+import * as Notifications from "expo-notifications";
 import React, {
   createContext,
   useCallback,
@@ -6,9 +7,11 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import authService from "./services/authService";
+import notificationService from "./services/notificationService";
 import orderService from "./services/orderService";
+import supplierService from "./services/supplierService";
 import tankService from "./services/tankService";
 
 // Create context
@@ -29,6 +32,8 @@ export function AppProvider({ children }) {
   const [autoOrder, setAutoOrder] = useState(false);
   const [lowWaterThreshold, setLowWaterThreshold] = useState(20);
   const [notifications, setNotifications] = useState([]);
+  const [newNotification, setNewNotification] = useState(null);
+  // State for orders, notification preferences, preferred supplier, suppliers, and tanks
   const [orders, setOrders] = useState([]);
   const [notificationPreferences, setNotificationPreferences] = useState({
     push: true,
@@ -36,6 +41,12 @@ export function AppProvider({ children }) {
     email: true,
   });
   const [preferredSupplier, setPreferredSupplier] = useState("");
+  const [suppliers, setSuppliers] = useState([]);
+  const [tanks, setTanks] = useState([]);
+
+  //states to track placing and cancelling orders
+  const [placedOrder, setPlacedOrder] = useState(false);
+  const [cancelledOrder, setCancelledOrder] = useState(false);
 
   // Refs to handle race conditions
   const isMounted = useRef(true);
@@ -44,6 +55,7 @@ export function AppProvider({ children }) {
 
   // Clean up on unmount
   useEffect(() => {
+    // Cleanup function when component unmounts
     return () => {
       isMounted.current = false;
       abortController.current.abort();
@@ -53,7 +65,6 @@ export function AppProvider({ children }) {
   useEffect(() => {
     // Call the non-memoized checkAuth function
     checkAuth();
-    // Empty dependency array since checkAuth is now a stable reference
   }, []);
 
   const checkAuth = async () => {
@@ -87,7 +98,7 @@ export function AppProvider({ children }) {
 
   const loadUserData = useCallback(async () => {
     // Prevent multiple simultaneous calls
-    if (loadingUserData.current || !user || !user.tankIds?.length) return;
+    if (loadingUserData.current || !user) return;
 
     loadingUserData.current = true;
 
@@ -96,22 +107,27 @@ export function AppProvider({ children }) {
       abortController.current = new AbortController();
       const signal = abortController.current.signal;
 
-      // Parallel requests for better performance
-      const [tank, orders] = await Promise.all([
+      const [tanks, orders, suppliers, notification] = await Promise.all([
         tankService.getTankData(user.tankIds[0], { signal }),
+
         orderService.getOrders({ signal }),
+
+        supplierService.getSuppliers({ signal }),
+
+        notificationService.getNotifications({ signal }),
       ]);
 
       // Only update state if component is still mounted
       if (isMounted.current) {
-
-        setTankSize(tank.capacity || 0);
-        setAvgDailyUsage(tank.avgDailyUsage || 0);
+        setTanks(tanks || []);
+        setNotifications(notification || []);
+        setTankSize(tanks.capacity || 0);
+        setAvgDailyUsage(tanks.avgDailyUsage || 0);
         setAutoOrder(user.autoOrder);
-        setLowWaterThreshold(tank.lowWaterThreshold || 20);
+        setLowWaterThreshold(tanks.lowWaterThreshold || 20);
         setOrders(orders || []);
-        setPreferredSupplier(user.preferredSupplier );
-
+        setPreferredSupplier(user.preferredSupplier || "");
+        setSuppliers(suppliers || []);
         setNotificationPreferences(
           user.notificationPreferences || {
             push: true,
@@ -136,10 +152,20 @@ export function AppProvider({ children }) {
 
   // Load user data when user changes
   useEffect(() => {
-    if (user) {
+    if (user || placedOrder || cancelledOrder) {
+      if (placedOrder) {
+        setPlacedOrder(false);
+        loadUserData();
+        return;
+      }
+      if (cancelledOrder) {
+        setCancelledOrder(false);
+        loadUserData();
+        return;
+      }
       loadUserData();
     }
-  }, [user, loadUserData]);
+  }, [user, placedOrder, cancelledOrder]);
 
   const login = useCallback(async (credentials) => {
     try {
@@ -149,6 +175,16 @@ export function AppProvider({ children }) {
       if (isMounted.current) {
         setUser(response.user);
         setIsAuthenticated(true);
+
+        const newNoti = {
+          userId: response.user.id,
+          type: "system",
+          message: `Welcome back, ${response.user.firstName}!`,
+          relatedTo: "users",
+          read: false,
+          sentVia: ["push"],
+        };
+        setNewNotification(newNoti);
       }
       return response;
     } catch (error) {
@@ -183,6 +219,39 @@ export function AppProvider({ children }) {
     }
   }, []);
 
+  // Send push notification
+  const schedulePushNotification = async (title, body) => {
+    if (Platform.OS === "web") {
+      return;
+    }
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+      },
+      trigger: null, // immediately
+    });
+  };
+
+  useEffect(() => {
+    if (!newNotification) return;
+    const createNewNotification = async () => {
+      try {
+        if (notificationPreferences.push) {
+          schedulePushNotification(newNotification.title, newNotification.body);
+        }
+        await notificationService.createNotification(newNotification);
+
+        setNotifications((prev) => [newNotification, ...prev]);
+        setNewNotification(null);
+        console.log("Notification created successfully");
+      } catch (error) {
+        console.error("Failed to schedule notification:", error);
+      }
+    };
+    createNewNotification();
+  }, [newNotification]);
+
   const resetAppState = useCallback(() => {
     setWaterLevel(0);
     setTankSize(0);
@@ -193,26 +262,49 @@ export function AppProvider({ children }) {
     setOrders([]);
   }, []);
 
-  const placeOrder = useCallback(async () => {
-    try {
-      const order = await orderService.placeOrder();
-      await loadUserData();
-      return order;
-    } catch (error) {
-      console.error("Failed to place order:", error);
-      Alert.alert(
-        "Order Error",
-        "Failed to place your order. Please try again later."
-      );
-      throw error;
-    }
-  }, [loadUserData]);
+  const placeOrder = useCallback(
+    async (orderData) => {
+      try {
+        const order = await orderService.placeOrder(orderData);
+        setPlacedOrder(true);
+        const newNoti = {
+          userId: user.id,
+          type: "order",
+          message: `Order placed successfully!`,
+          relatedTo: "order",
+          read: false,
+          sentVia: ["push"],
+        };
+        setNewNotification(newNoti);
+        console.log("Order placed successfully");
+        return order;
+      } catch (error) {
+        console.error("Failed to place order:", error);
+        Alert.alert(
+          "Error",
+          "Failed to place your order. Please try again later."
+        );
+        throw error;
+      }
+    },
+    [loadUserData]
+  );
 
   const cancelOrder = useCallback(
     async (orderId) => {
       try {
         await orderService.cancelOrder(orderId);
-        await loadUserData();
+        setCancelledOrder(true);
+        const newNoti = {
+          userId: user.id,
+          type: "order",
+          message: `Order cancelled successfully!`,
+          relatedTo: "order",
+          read: false,
+          sentVia: ["push"],
+        };
+        setNewNotification(newNoti);
+        console.log("Order cancelled successfully");
         return true;
       } catch (error) {
         console.error("Failed to cancel order:", error);
@@ -255,6 +347,8 @@ export function AppProvider({ children }) {
     orders,
     notificationPreferences,
     preferredSupplier,
+    suppliers,
+    tanks,
 
     // Methods
     setAutoOrder,
@@ -268,6 +362,7 @@ export function AppProvider({ children }) {
     setAvgDailyUsage,
     setLowWaterThreshold,
     setPreferredSupplier,
+    setSuppliers,
   };
 
   return (

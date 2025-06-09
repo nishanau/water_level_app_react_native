@@ -31,6 +31,13 @@ function RootLayoutNav() {
     const { isAuthenticated, loading } = context;
     if (loading || isAuthenticated === undefined) return;
 
+    // Add this check to prevent unnecessary redirects
+    const inCorrectRoute = isAuthenticated
+      ? segments[0] === "(tabs)"
+      : segments[0] === "login";
+
+    if (inCorrectRoute) return;
+
     // Check if user is in an auth route or main app route
     const isAuthRoute = segments[0] === "login" || segments[0] === "register";
 
@@ -49,8 +56,6 @@ function RootLayoutNav() {
 
   // Render based on loading state - no conditional hooks
   if (!context || context.loading || context.isAuthenticated === undefined) {
-
-    
     return (
       <View
         style={{

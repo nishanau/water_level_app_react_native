@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
+  Alert,
   FlatList,
   Modal,
   Platform,
@@ -77,11 +78,20 @@ export default function OrdersScreen() {
 
   // Handle order cancellation
   const handleCancelOrder = async (): Promise<void> => {
-    if (orderToCancel) {
+    try {
+          if (orderToCancel) {
       await cancelOrder(orderToCancel);
       setOrderToCancel(null);
     }
     setShowCancelConfirmModal(false);
+  } catch (error) {
+    Alert.alert(
+      "Cancellation Failed",
+        "An error occurred while cancelling the order. Please try again later."
+      );
+      console.error("Failed to cancel order:", error);
+    }
+
   };
   // Handle order rescheduling
   const handleReschedule = (order: Order): void => {
@@ -158,13 +168,14 @@ export default function OrdersScreen() {
                   <OrderItem
                     key={order._id}
                     order={{
-                      id: order.orderNumber,
+                      id: order._id,
                       date: order.orderDate,
                       status: order.status,
                       amount: order.quantity,
                       price: order.price,
-                      deliveryDate: order.scheduledDeliveryDate,
+                      deliveryDate: order.scheduledDeliveryDate ,
                       invoice: order.orderNumber,
+                      name: order.orderNumber,
                     }}
                     onCancel={showCancelConfirmation}
                     onReschedule={handleReschedule}
@@ -193,13 +204,14 @@ export default function OrdersScreen() {
                   <OrderItem
                     key={order._id}
                     order={{
-                      id: order.orderNumber,
+                      id: order.id,
                       date: order.orderDate,
                       status: order.status,
                       amount: order.quantity,
                       price: order.price,
                       deliveryDate: order.scheduledDeliveryDate,
                       invoice: order.orderNumber,
+                      name: order.orderNumber,
                     }}
                     onCancel={undefined}
                     onReschedule={undefined}

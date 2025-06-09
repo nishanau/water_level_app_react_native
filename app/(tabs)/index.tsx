@@ -1,11 +1,12 @@
 import { useAppContext } from "@/AppContext";
 import { CircularProgressIndicator } from "@/components";
+import { ManualOrderModal } from "@/components/ManualOrderModal";
 import { calculateDaysRemaining, COLORS, formatDate } from "@/constants";
 import apiService from "@/services/apiService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React from "react";
+import { useState } from "react";
 import {
   Alert,
   SafeAreaView,
@@ -19,6 +20,7 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [showManualOrderModal, setShowManualOrderModal] = useState(false);
 
   const {
     waterLevel,
@@ -31,6 +33,9 @@ export default function HomeScreen() {
     loading,
     setUser,
     setAutoOrder,
+    suppliers,
+    preferredSupplier,
+    tanks
   } = useAppContext();
 
   // Calculate days remaining
@@ -80,10 +85,28 @@ export default function HomeScreen() {
       console.error("Error updating auto-order:", error);
     }
   };
-
+  // console.log("suppliers in home screen", suppliers);
+  // console.log("preferredSupplier in home screen", preferredSupplier);
   // Place manual order
-  const handlePlaceOrder = async () => {
-    await placeOrder();
+  const handlePlaceOrder = () => {
+    setShowManualOrderModal(true);
+  };
+
+
+  const handleConfirmOrder = async (orderData: {
+    quantity: number;
+    supplierId: string;
+    requestedDeliveryDate: Date;
+    deliveryNotes: string;
+    tankId: string;
+    price: number;
+  }) => {
+    try {
+      await placeOrder(orderData);
+      setShowManualOrderModal(false);
+    } catch (error) {
+      console.error("Failed to place order:", error);
+    }
   };
 
   // View order history
@@ -178,6 +201,16 @@ export default function HomeScreen() {
             <Text style={styles.statValue}>{avgDailyUsage} L</Text>
           </View>
         </View>
+
+        <ManualOrderModal
+          visible={showManualOrderModal}
+          onClose={() => setShowManualOrderModal(false)}
+          onConfirm={handleConfirmOrder}
+          loading={loading}
+          suppliers={suppliers}
+          preferredSupplier={preferredSupplier}
+          tanks={tanks}
+        />
       </ScrollView>
     </SafeAreaView>
   );

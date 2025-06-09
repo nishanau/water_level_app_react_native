@@ -19,7 +19,7 @@ interface HistoryDataItem {
 }
 
 interface Notification {
-  id: number;
+  _id: string;
   type: string;
   message: string;
   date: string;
@@ -175,7 +175,7 @@ export default function HistoryScreen() {
           {notifications.length > 0 ? (
             notifications.map((notification: Notification) => (
               <NotificationItemComponent
-                key={notification.id}
+                key={notification._id}
                 notification={notification}
               />
             ))
