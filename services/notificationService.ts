@@ -6,7 +6,7 @@ class NotificationService {
   async getNotifications() {
     try{
     const response = await api.get("/notifications");
-    console.log("Notifications response:", response.data);
+
     return response.data;
     }
     catch (error) {

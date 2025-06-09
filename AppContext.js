@@ -33,6 +33,7 @@ export function AppProvider({ children }) {
   const [lowWaterThreshold, setLowWaterThreshold] = useState(20);
   const [notifications, setNotifications] = useState([]);
   const [newNotification, setNewNotification] = useState(null);
+
   // State for orders, notification preferences, preferred supplier, suppliers, and tanks
   const [orders, setOrders] = useState([]);
   const [notificationPreferences, setNotificationPreferences] = useState({
@@ -165,6 +166,7 @@ export function AppProvider({ children }) {
       }
       loadUserData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, placedOrder, cancelledOrder]);
 
   const login = useCallback(async (credentials) => {
@@ -217,6 +219,7 @@ export function AppProvider({ children }) {
         setLoading(false);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Send push notification
@@ -250,6 +253,7 @@ export function AppProvider({ children }) {
       }
     };
     createNewNotification();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newNotification]);
 
   const resetAppState = useCallback(() => {

@@ -1,6 +1,8 @@
+import { Picker } from "@react-native-picker/picker";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { getWaterLevelColor } from "../constants";
+import { COLORS, getWaterLevelColor } from "../constants";
+
 
 export const WaterTankIndicator = ({ level, size = 200 }) => {
   const waterHeight = (level / 100) * size;
@@ -36,9 +38,15 @@ export const CircularProgressIndicator = ({
   level,
   size = 200,
   strokeWidth = 15,
+  tanks,
+  setSelectedTank,
 }) => {
   // Only keep variables that are used
   const color = getWaterLevelColor(level);
+  const handleChange = (value) => {
+    setSelectedTank(value);
+  };
+    console.log("tank length", tanks.length);
 
   return (
     <View style={[styles.circularContainer, { width: size, height: size }]}>
@@ -51,6 +59,58 @@ export const CircularProgressIndicator = ({
         >
           <Text style={styles.circularPercentage}>{Math.round(level)}%</Text>
           <Text style={styles.circularLabel}>Water Level</Text>
+          
+          {tanks && tanks.length > 1 && (
+            <>
+            <Text style={styles.circularLabel}>Select Tank:</Text>
+            <Picker
+              selectedValue={tanks[0]._id}
+              onValueChange={(itemValue) => handleChange(itemValue)}
+              style={[
+                styles.dropdown,
+                {
+                  height: 50,
+                  backgroundColor: COLORS.white,
+                  borderWidth: 1,
+                  borderColor: COLORS.border,
+                  borderRadius: 4,
+                  paddingHorizontal: 12,
+                  fontSize: 16,
+                },
+                styles.dropdownText,
+                {
+                  fontSize: 16,
+                  color: COLORS.text,
+                },
+              ]}
+            >
+              <Picker.Item
+                label="Select Tank"
+                value=""
+                style={
+                  (styles.dropdownPlaceholder,
+                  {
+                    color: COLORS.gray,
+                  })
+                }
+              />
+              {tanks.map((tank) => (
+                <Picker.Item
+                  key={tank._id}
+                  label={tank.deviceId}
+                  value={tank._id}
+                  style={
+                    (styles.dropdownText,
+                    {
+                      fontSize: 16,
+                      color: COLORS.text,
+                    })
+                  }
+                />
+              ))}
+            </Picker>
+            </>
+          )}
         </View>
       </View>
 

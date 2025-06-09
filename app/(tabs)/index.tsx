@@ -8,20 +8,27 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [showManualOrderModal, setShowManualOrderModal] = useState(false);
+  const colorScheme = useColorScheme(); // 'light' or 'dark'
 
+  // Choose colors based on theme
+  const statusBarBg = colorScheme === "dark" ? "#fff" : "#000";
+  const barStyle = colorScheme === "dark" ? "dark-content" : "light-content";
   const {
     waterLevel,
     tankSize,
@@ -35,8 +42,11 @@ export default function HomeScreen() {
     setAutoOrder,
     suppliers,
     preferredSupplier,
-    tanks
+    tanks,
   } = useAppContext();
+  const [selectedTank, setSelectedTank] = useState<string | null>(
+    tanks[0]?._id || null
+  );
 
   // Calculate days remaining
   const daysRemaining = calculateDaysRemaining(
@@ -85,13 +95,12 @@ export default function HomeScreen() {
       console.error("Error updating auto-order:", error);
     }
   };
-  // console.log("suppliers in home screen", suppliers);
+
   // console.log("preferredSupplier in home screen", preferredSupplier);
   // Place manual order
   const handlePlaceOrder = () => {
     setShowManualOrderModal(true);
   };
-
 
   const handleConfirmOrder = async (orderData: {
     quantity: number;
@@ -116,15 +125,23 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={statusBarBg} barStyle={barStyle} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>Water Tank Monitor</Text>
         </View>
-
         <View style={styles.tankContainer}>
-          <CircularProgressIndicator level={waterLevel} size={250} />
+          {tanks ? (
+            <CircularProgressIndicator
+              level={waterLevel}
+              size={250}
+              tanks={tanks}
+              setSelectedTank={setSelectedTank}
+            />
+          ) : (
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          )}
         </View>
-
         <View style={styles.infoContainer}>
           <View style={styles.infoCard}>
             <MaterialCommunityIcons
