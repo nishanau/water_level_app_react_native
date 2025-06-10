@@ -131,7 +131,7 @@ export function ManualOrderModal({
             <Text style={styles.label}>Select Supplier</Text>
             <View style={styles.pickerContainer}>
               <Picker
-                selectedValue={preferredSupplier}
+                selectedValue={selectedSupplier}
                 onValueChange={(value) => setSelectedSupplier(value)}
                 style={styles.picker}
               >

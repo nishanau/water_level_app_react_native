@@ -6,7 +6,7 @@ import apiService from "@/services/apiService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -32,6 +32,9 @@ export default function HomeScreen() {
   const {
     waterLevel,
     tankSize,
+    setTankSize,
+    setAvgDailyUsage,
+    setLowWaterThreshold,
     avgDailyUsage,
     nextDelivery,
     autoOrder,
@@ -43,10 +46,17 @@ export default function HomeScreen() {
     suppliers,
     preferredSupplier,
     tanks,
+    setSelectedTank,
+    selectedTank,
   } = useAppContext();
-  const [selectedTank, setSelectedTank] = useState<string | null>(
-    tanks[0]?._id || null
-  );
+
+  useEffect(() => {
+    const selectTankData = tanks.find((tank:any) => tank._id === selectedTank);
+
+    setTankSize(selectTankData?.capacity || 0);
+    setAvgDailyUsage(selectTankData?.avgDailyUsage || 0);
+    setLowWaterThreshold(selectTankData?.lowWaterThreshold || 0);
+  }, [selectedTank]);
 
   // Calculate days remaining
   const daysRemaining = calculateDaysRemaining(
@@ -137,10 +147,21 @@ export default function HomeScreen() {
               size={250}
               tanks={tanks}
               setSelectedTank={setSelectedTank}
+              selectedTank={selectedTank}
             />
           ) : (
             <ActivityIndicator size="large" color={COLORS.primary} />
           )}
+        </View>
+        <View style={styles.quickStats}>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Tank Size</Text>
+            <Text style={styles.statValue}>{tankSize} L</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Avg. Daily Usage</Text>
+            <Text style={styles.statValue}>{avgDailyUsage} L</Text>
+          </View>
         </View>
         <View style={styles.infoContainer}>
           <View style={styles.infoCard}>
@@ -150,6 +171,7 @@ export default function HomeScreen() {
               color={COLORS.primary}
               style={styles.infoIcon}
             />
+
             <View>
               <Text style={styles.infoLabel}>Estimated Days Remaining</Text>
               <Text style={styles.infoValue}>{daysRemaining} days</Text>
@@ -206,17 +228,6 @@ export default function HomeScreen() {
             <MaterialCommunityIcons name="history" size={20} color="white" />
             <Text style={styles.actionButtonText}>View Order History</Text>
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.quickStats}>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Tank Size</Text>
-            <Text style={styles.statValue}>{tankSize} L</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Avg. Daily Usage</Text>
-            <Text style={styles.statValue}>{avgDailyUsage} L</Text>
-          </View>
         </View>
 
         <ManualOrderModal

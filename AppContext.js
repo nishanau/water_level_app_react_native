@@ -44,6 +44,7 @@ export function AppProvider({ children }) {
   const [preferredSupplier, setPreferredSupplier] = useState("");
   const [suppliers, setSuppliers] = useState([]);
   const [tanks, setTanks] = useState([]);
+  const [selectedTank, setSelectedTank] = useState(tanks[0]?._id || null);
 
   //states to track placing and cancelling orders
   const [placedOrder, setPlacedOrder] = useState(false);
@@ -108,24 +109,28 @@ export function AppProvider({ children }) {
       abortController.current = new AbortController();
       const signal = abortController.current.signal;
 
-      const [tanks, orders, suppliers, notification] = await Promise.all([
-        tankService.getTankData(user.tankIds[0], { signal }),
+      const [tanksResponse, orders, suppliers, notification] =
+        await Promise.all([
+          tankService.getAllTanks({ signal }),
 
-        orderService.getOrders({ signal }),
+          orderService.getOrders({ signal }),
 
-        supplierService.getSuppliers({ signal }),
+          supplierService.getSuppliers({ signal }),
 
-        notificationService.getNotifications({ signal }),
-      ]);
+          notificationService.getNotifications({ signal }),
+        ]);
 
       // Only update state if component is still mounted
       if (isMounted.current) {
-        setTanks(tanks || []);
+        console.log("tanks in loadUserData:", tanksResponse);
+        setTanks(tanksResponse || []);
+        setSelectedTank(tanksResponse[0]?._id || null);
+
         setNotifications(notification || []);
-        setTankSize(tanks.capacity || 0);
-        setAvgDailyUsage(tanks.avgDailyUsage || 0);
+        setTankSize(tanksResponse[0].capacity || 0);
+        setAvgDailyUsage(tanksResponse[0].avgDailyUsage || 0);
         setAutoOrder(user.autoOrder);
-        setLowWaterThreshold(tanks.lowWaterThreshold || 20);
+        setLowWaterThreshold(tanksResponse[0].lowWaterThreshold || 20);
         setOrders(orders || []);
         setPreferredSupplier(user.preferredSupplier || "");
         setSuppliers(suppliers || []);
@@ -353,6 +358,7 @@ export function AppProvider({ children }) {
     preferredSupplier,
     suppliers,
     tanks,
+    selectedTank,
 
     // Methods
     setAutoOrder,
@@ -367,6 +373,7 @@ export function AppProvider({ children }) {
     setLowWaterThreshold,
     setPreferredSupplier,
     setSuppliers,
+    setSelectedTank,
   };
 
   return (

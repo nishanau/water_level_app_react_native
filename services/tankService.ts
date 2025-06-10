@@ -8,6 +8,12 @@ class TankService {
 
     return response.data;
   }
+
+  async getAllTanks() {
+    const response = await api.get(`/tanks`);
+
+    return response.data;
+  }
 }
 
 export default new TankService();

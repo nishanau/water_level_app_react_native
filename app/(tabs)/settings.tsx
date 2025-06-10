@@ -29,6 +29,7 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
     avgDailyUsage,
     lowWaterThreshold,
     user,
+    selectedTank,
   } = useAppContext();
 
   // Local state to track changes
@@ -59,17 +60,17 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
       Alert.alert("Invalid Input", "Threshold must be between 0 and 100");
       return;
     }
-
-    const response = await apiService.patchFields("tanks", user.tankIds[0], {
-      capacity: tankSizeNum,
-      avgDailyUsage: avgUsageNum,
-      lowWaterThreshold: thresholdNum,
-    });
-
-    if (response) {
+    try {
+      await apiService.patchFields("tanks", selectedTank, {
+        capacity: tankSizeNum,
+        avgDailyUsage: avgUsageNum,
+        lowWaterThreshold: thresholdNum,
+      });
       setTankSize(tankSizeNum);
       setAvgDailyUsage(avgUsageNum);
       setLowWaterThreshold(thresholdNum);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to save tank settings");
     }
 
     Alert.alert("Success", "Tank settings saved successfully");

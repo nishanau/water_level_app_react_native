@@ -1,8 +1,8 @@
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 import { COLORS, getWaterLevelColor } from "../constants";
-
 
 export const WaterTankIndicator = ({ level, size = 200 }) => {
   const waterHeight = (level / 100) * size;
@@ -40,13 +40,14 @@ export const CircularProgressIndicator = ({
   strokeWidth = 15,
   tanks,
   setSelectedTank,
+  selectedTank,
 }) => {
+  const [open, setOpen] = React.useState(false);
   // Only keep variables that are used
   const color = getWaterLevelColor(level);
   const handleChange = (value) => {
     setSelectedTank(value);
   };
-    console.log("tank length", tanks.length);
 
   return (
     <View style={[styles.circularContainer, { width: size, height: size }]}>
@@ -59,56 +60,95 @@ export const CircularProgressIndicator = ({
         >
           <Text style={styles.circularPercentage}>{Math.round(level)}%</Text>
           <Text style={styles.circularLabel}>Water Level</Text>
-          
-          {tanks && tanks.length > 1 && (
+
+          {tanks && tanks.length > 1 && Platform.OS !== "android" && (
             <>
-            <Text style={styles.circularLabel}>Select Tank:</Text>
-            <Picker
-              selectedValue={tanks[0]._id}
-              onValueChange={(itemValue) => handleChange(itemValue)}
-              style={[
-                styles.dropdown,
-                {
-                  height: 50,
-                  backgroundColor: COLORS.white,
-                  borderWidth: 1,
-                  borderColor: COLORS.border,
-                  borderRadius: 4,
-                  paddingHorizontal: 12,
-                  fontSize: 16,
-                },
-                styles.dropdownText,
-                {
-                  fontSize: 16,
-                  color: COLORS.text,
-                },
-              ]}
-            >
-              <Picker.Item
-                label="Select Tank"
-                value=""
-                style={
-                  (styles.dropdownPlaceholder,
+              <Picker
+                selectedValue={selectedTank}
+                onValueChange={(itemValue) => handleChange(itemValue)}
+                style={[
+                  styles.dropdown,
                   {
-                    color: COLORS.gray,
-                  })
-                }
-              />
-              {tanks.map((tank) => (
+                    height: 30,
+                    width: 90,
+                    borderWidth: 1,
+                    borderStyle: "solid",
+                    borderColor: COLORS.border,
+                    borderRadius: 50,
+                    paddingHorizontal: 5,
+                    fontSize: 12,
+                    marginTop: 20,
+                  },
+                  styles.dropdownText,
+                  {
+                    fontSize: 12,
+                    color: COLORS.text,
+                  },
+                ]}
+              >
                 <Picker.Item
-                  key={tank._id}
-                  label={tank.deviceId}
-                  value={tank._id}
+                  label="Select Tank"
+                  value=""
                   style={
-                    (styles.dropdownText,
+                    (styles.dropdownPlaceholder,
                     {
-                      fontSize: 16,
-                      color: COLORS.text,
+                      color: COLORS.gray,
                     })
                   }
                 />
-              ))}
-            </Picker>
+                {tanks.map((tank) => (
+                  <Picker.Item
+                    key={tank._id}
+                    label={tank.deviceId}
+                    value={tank._id}
+                    style={
+                      (styles.dropdownText,
+                      {
+                        fontSize: 16,
+                        color: COLORS.text,
+                      })
+                    }
+                  />
+                ))}
+              </Picker>
+            </>
+          )}
+          {tanks && tanks.length > 1 && Platform.OS === "android" && (
+            <>
+              <DropDownPicker
+                open={open}
+                value={selectedTank}
+                items={tanks.map((tank) => ({
+                  label: tank.deviceId,
+                  value: tank._id,
+                }))}
+                setOpen={setOpen}
+                setValue={handleChange}
+                placeholder="Select Tank"
+                style={{
+                  height: 20,
+                  width: 120,
+                  borderWidth: 1,
+                  borderColor: COLORS.border,
+
+                  borderRadius: 50,
+                  paddingHorizontal: 15,
+                  fontSize: 12,
+                  marginTop: 10,
+                  marginLeft: 50,
+                }}
+                textStyle={{
+                  fontSize: 12,
+                  color: COLORS.text,
+                }}
+                placeholderStyle={{
+                  color: COLORS.gray,
+                }}
+                dropDownContainerStyle={{
+                  borderColor: COLORS.border,
+                  borderRadius: 12,
+                }}
+              />
             </>
           )}
         </View>

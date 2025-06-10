@@ -1,7 +1,8 @@
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter, useSegments } from "expo-router";
-import React, { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, Platform, View } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
 import { AppProvider, useAppContext } from "../AppContext";
 import { COLORS } from "../constants";
 
@@ -20,9 +21,10 @@ Notifications.setNotificationHandler({
 function RootLayoutNav() {
   // Move all hooks to the top level - no conditional hooks
   const context = useAppContext();
-
   const segments = useSegments();
   const router = useRouter();
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const animationRef = useRef<Animated.CompositeAnimation | null>(null);
 
   // Handle auth state changes - always call this hook
   useEffect(() => {
@@ -54,6 +56,36 @@ function RootLayoutNav() {
     }
   }, [context, segments, router]);
 
+  useEffect(() => {
+    // Reset animation value before starting
+    pulseAnim.setValue(1);
+
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.6,
+          duration: 1000,
+          useNativeDriver: Platform.OS === "web" ? false : true, // Disable native driver for web
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: Platform.OS === "web" ? false : true,
+        }),
+      ])
+    );
+
+    animationRef.current = animation;
+    animation.start();
+
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.stop();
+        pulseAnim.setValue(1);
+      }
+    };
+  }, []); // Empty dependency array
+
   // Render based on loading state - no conditional hooks
   if (!context || context.loading || context.isAuthenticated === undefined) {
     return (
@@ -64,7 +96,35 @@ function RootLayoutNav() {
           alignItems: "center",
         }}
       >
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Animated.Image
+          source={require("../assets/images/name.png")}
+          style={[
+            {
+              width: 200,
+              height: 200,
+            },
+            Platform.OS === "web"
+              ? {
+                  opacity: pulseAnim,
+                  transform: [{ scale: pulseAnim }],
+                }
+              : {
+                  transform: [
+                    {
+                      scale: pulseAnim.interpolate({
+                        inputRange: [0.6, 1],
+                        outputRange: [0.8, 1],
+                        extrapolate: "clamp",
+                      }),
+                    },
+                  ],
+                },
+          ]}
+          resizeMode="contain"
+        />
+        {Platform.OS === "web" && (
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        )}
       </View>
     );
   }

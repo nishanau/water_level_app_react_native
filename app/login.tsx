@@ -3,35 +3,30 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { useAppContext } from "../AppContext";
 import { COLORS } from "../constants";
+
 
 export default function LoginScreen() {
   const router = useRouter();
   const context = useAppContext();
 
-  if (!context) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
-  }
-
   const { login } = context;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
 
   const validateForm = () => {
-    if (!email.trim() || !password.trim()) {
+    if (!email.trim() || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return false;
     }
@@ -48,32 +43,39 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (!validateForm()) return;
 
-    setLoading(true);
+    setLoginLoading(true);
     try {
       await login({ email, password });
-      router.replace("/(tabs)"); // Use proper route instead of "/(tabs)"
-    } catch (error) {
+      //  router.replace("/(tabs)"); // Use proper route instead of "/(tabs)"
+    } catch (error: any) {
       Alert.alert(
         "Login Failed",
         error.message || "An error occurred during login"
       );
     } finally {
-      setLoading(false);
+      setLoginLoading(false);
     }
   };
+  if (!context) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
       <View style={styles.content}>
-        {/* <Image
-          source={require("../assets/logo.png")}
+        <Image
+          source={require("../assets/images/name.png")}
           style={styles.logo}
           resizeMode="contain"
-        /> */}
+        />
 
-        <Text style={styles.title}>Welcome Back!</Text>
+        {/* <Text style={styles.title}>Sign In</Text> */}
 
         <View style={styles.form}>
           <TextInput
@@ -104,13 +106,13 @@ export default function LoginScreen() {
           <TouchableOpacity
             style={styles.loginButton}
             onPress={handleLogin}
-            disabled={loading}
+            disabled={loginLoading}
           >
-            {loading ? (
-              <ActivityIndicator color={COLORS.white} />
-            ) : (
-              <Text style={styles.loginButtonText}>Login</Text>
-            )}
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              {loginLoading && <ActivityIndicator color={COLORS.white} />}
+
+              <Text style={styles.loginButtonText}> Login</Text>
+            </View>
           </TouchableOpacity>
 
           <View style={styles.registerContainer}>
@@ -139,6 +141,7 @@ const styles = StyleSheet.create({
     height: 120,
     width: "100%",
     marginBottom: 32,
+    opacity: 0.6,
   },
   title: {
     fontSize: 28,
@@ -164,6 +167,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   forgotPasswordText: {
+    marginBottom: 15,
     color: COLORS.primary,
     fontSize: 14,
   },
