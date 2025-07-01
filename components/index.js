@@ -1,11 +1,9 @@
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
 import {
-  Linking,
   Platform,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -196,91 +194,7 @@ export const CircularProgressIndicator = ({
   );
 };
 
-export const OrderItem = ({ order, onCancel, onReschedule }) => {
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "completed":
-        return "#28a745";
-      case "In Transit":
-        return "#0088cc";
-      case "scheduled":
-        return "#ffc107";
-      case "cancelled":
-        return "#dc3545";
-      case "placed":
-        return "#17a2b8";
-      default:
-        return "#888888";
-    }
-  };
 
-  return (
-    <View style={styles.orderItem}>
-      <View style={styles.orderHeader}>
-        <Text style={styles.orderId}>{order.orderNumber}</Text>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: getStatusColor(order.status) },
-          ]}
-        >
-          <Text style={styles.statusText}>{order.status}</Text>
-        </View>
-      </View>
-
-      <View style={styles.orderDetails}>
-        <Text style={styles.orderDate}>
-          Order Date: {new Date(order.orderDate).toLocaleDateString()}
-        </Text>
-        {order.scheduledDeliveryDate ? (
-          <Text style={styles.deliveryDate}>
-            Delivery:{" "}
-            {new Date(order.scheduledDeliveryDate).toLocaleDateString()}
-          </Text>
-        ) : (
-          <Text style={styles.deliveryDate}>Delivery: Not Scheduled</Text>
-        )}
-        <Text>Supplier: {order.supplier.company} </Text>
-        <Text style={styles.orderAmount}>
-          Amount: {order.quantity} L • ${order.price.toFixed(2)}
-        </Text>
-      </View>
-
-      {(order.status === "scheduled" || order.status === "placed") && (
-        <View style={styles.orderActions}>
-          {onCancel && (
-            <Text
-              style={[styles.actionButton, styles.cancelButton]}
-              onPress={() => onCancel(order)}
-            >
-              Cancel
-            </Text>
-          )}
-          {onReschedule && order.status === "scheduled" && (
-            <Text
-              style={[styles.actionButton, styles.rescheduleButton]}
-              onPress={() => onReschedule(order)}
-            >
-              Reschedule
-            </Text>
-          )}
-        </View>
-      )}
-
-      {order.invoice ? (
-        <TouchableOpacity
-          onPress={() => Linking.openURL(order.invoice.downloadURL)}
-        >
-          <Text style={styles.invoiceLink}>
-            Invoice: {order.invoice.fileName}
-          </Text>
-        </TouchableOpacity>
-      ) : (
-        <Text>No Invoice Available</Text>
-      )}
-    </View>
-  );
-};
 
 export const NotificationItem = ({ notification }) => {
   const getIconName = (type) => {
@@ -422,81 +336,7 @@ const styles = StyleSheet.create({
     color: "#666",
   },
 
-  // Order Item
-  orderItem: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  orderHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  orderId: {
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  orderDetails: {
-    marginBottom: 10,
-  },
-  orderDate: {
-    color: "#666",
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  deliveryDate: {
-    color: "#666",
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  orderAmount: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  orderActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 8,
-  },
-  actionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-    marginLeft: 8,
-    overflow: "hidden",
-    fontSize: 14,
-  },
-  cancelButton: {
-    backgroundColor: "#f8d7da",
-    color: "#721c24",
-  },
-  rescheduleButton: {
-    backgroundColor: "#cce5ff",
-    color: "#004085",
-  },
-  invoiceLink: {
-    color: "#0088cc",
-    textDecorationLine: "underline",
-    cursor: "pointer",
-  },
+  
 
   // Notification Item
   notificationItem: {

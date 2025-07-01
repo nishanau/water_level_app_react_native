@@ -1,15 +1,17 @@
 import { useAppContext } from "@/AppContext";
-import { OrderItem } from "@/components";
+import { OrderItem } from "@/components/OrderCard";
 import { COLORS } from "@/constants";
 import orderService from "@/services/orderService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import {
   Alert,
   FlatList,
   Modal,
   Platform,
+  RefreshControl,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -49,7 +51,8 @@ interface DateTimePickerEvent {
 }
 
 export default function OrdersScreen() {
-  const { orders, rescheduleOrder, user, setNewNotification } = useAppContext();
+  const { orders, rescheduleOrder, user, setNewNotification, loadUserData } =
+    useAppContext();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -57,6 +60,7 @@ export default function OrdersScreen() {
   const [showCancelConfirmModal, setShowCancelConfirmModal] =
     useState<boolean>(false);
   const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Filter orders by status
   const upcomingOrders = orders.filter(
@@ -156,6 +160,13 @@ export default function OrdersScreen() {
     setShowDatePicker(false);
     setSelectedOrder(null);
   };
+  // Pull-to-refresh handler
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadUserData();
+    setRefreshing(false);
+  };
+
   // Render header for each section
   const renderSectionHeader = (title: string, count: number) => (
     <View style={styles.sectionHeader}>
@@ -166,11 +177,22 @@ export default function OrdersScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Gradient background */}
+      <LinearGradient
+        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
+
       <View style={styles.header}>
-        <Text style={styles.title}>Water Orders</Text>
+        <Text style={styles.title}>Orders</Text>
       </View>
       <FlatList
         data={[]}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         ListHeaderComponent={() => (
           <View>
             {/* Upcoming Orders Section */}
@@ -178,12 +200,13 @@ export default function OrdersScreen() {
               {renderSectionHeader("Upcoming Orders", upcomingOrders.length)}
               {upcomingOrders.length > 0 ? (
                 upcomingOrders.map((order: Order) => (
-                  <OrderItem
-                    key={order._id}
-                    order={order}
-                    onCancel={showCancelConfirmation}
-                    onReschedule={handleReschedule}
-                  />
+                  <View style={styles.orderCardWrapper} key={order._id}>
+                    <OrderItem
+                      order={order}
+                      onCancel={showCancelConfirmation}
+                      onReschedule={handleReschedule}
+                    />
+                  </View>
                 ))
               ) : (
                 <View style={styles.emptyContainer}>
@@ -205,12 +228,13 @@ export default function OrdersScreen() {
               {renderSectionHeader("Past Orders", pastOrders.length)}
               {pastOrders.length > 0 ? (
                 pastOrders.map((order: Order) => (
-                  <OrderItem
-                    key={order._id}
-                    order={order}
-                    onCancel={undefined}
-                    onReschedule={undefined}
-                  />
+                  <View style={styles.orderCardWrapper} key={order._id}>
+                    <OrderItem
+                      order={order}
+                      onCancel={undefined}
+                      onReschedule={undefined}
+                    />
+                  </View>
                 ))
               ) : (
                 <View style={styles.emptyContainer}>
@@ -328,7 +352,6 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     paddingTop: 60,
-    backgroundColor: COLORS.white,
   },
   title: {
     fontSize: 24,
@@ -341,8 +364,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: COLORS.lightGray,
-    marginTop: 16,
+    // marginTop: 16,
   },
   sectionTitle: {
     fontSize: 16,
@@ -421,5 +443,9 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: COLORS.white,
     fontWeight: "500",
+  },
+  orderCardWrapper: {
+    marginHorizontal: 8,
+    marginVertical: 8,
   },
 });

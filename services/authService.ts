@@ -130,7 +130,7 @@ class AuthService {
 
   async register(userData: RegisterData): Promise<void> {
     try {
-      await this.api.post("/auth/register", userData);
+      await this.api.post("/auth/register-user", userData);
     } catch (error: any) {
       console.error(
         "Registration error:",

@@ -12,7 +12,6 @@ import authService from "./services/authService";
 import notificationService from "./services/notificationService";
 import orderService from "./services/orderService";
 import supplierService from "./services/supplierService";
-import tankService from "./services/tankService";
 
 // Create context
 const AppContext = createContext();
@@ -108,9 +107,8 @@ export function AppProvider({ children }) {
       abortController.current = new AbortController();
       const signal = abortController.current.signal;
 
-      const [tanksResponse, orders, suppliers, notification] =
+      const [ orders, suppliers, notification] =
         await Promise.all([
-          tankService.getAllTanks({ signal }),
 
           orderService.getOrders({ signal }),
 
@@ -125,13 +123,13 @@ export function AppProvider({ children }) {
           "User data loaded successfully",
           user.notificationPreferences
         );
-        setTanks(tanksResponse || []);
-        setSelectedTank(tanksResponse[0]?._id || null);
+        setTanks(user.tanks || []);
+        setSelectedTank(user.tanks[0]?._id || null);
         setNotifications(notification || []);
-        setTankSize(tanksResponse[0].capacity || 0);
-        setAvgDailyUsage(tanksResponse[0].avgDailyUsage || 0);
+        setTankSize(user.tanks[0].capacity || 0);
+        setAvgDailyUsage(user.tanks[0].avgDailyUsage || 0);
         setAutoOrder(user.autoOrder);
-        setLowWaterThreshold(tanksResponse[0].lowWaterThreshold || 20);
+        setLowWaterThreshold(user.tanks[0].lowWaterThreshold || 20);
         setOrders(orders || []);
         setPreferredSupplier(user.preferredSupplier || "");
         setSuppliers(suppliers || []);

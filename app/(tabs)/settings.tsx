@@ -5,7 +5,8 @@ import apiService from "@/services/apiService";
 import authService from "@/services/authService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import { Stack, useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -78,6 +79,12 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
@@ -190,6 +197,12 @@ function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
@@ -273,6 +286,12 @@ function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
@@ -416,6 +435,12 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
@@ -656,6 +681,12 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
@@ -866,7 +897,12 @@ export default function SettingsScreen() {
       // Main settings menu
       return (
         <SafeAreaView style={styles.container}>
-          <Stack.Screen options={{ headerShown: false }} />
+          <LinearGradient
+            colors={["#e3f0ff", "#f8fbff", "#fff"]}
+            style={StyleSheet.absoluteFill}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+          />
           <View style={styles.header}>
             <Text style={styles.title}>Settings</Text>
           </View>
@@ -1070,7 +1106,6 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     paddingTop: 60,
-    backgroundColor: COLORS.white,
     flexDirection: "row",
     alignItems: "center",
   },

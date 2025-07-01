@@ -1,15 +1,12 @@
 import { useAppContext } from "@/AppContext";
-import { NotificationItem as NotificationItemComponent } from "@/components";
 import { COLORS, getWaterLevelColor } from "@/constants";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React from "react";
 import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 // Define interfaces for our data types
@@ -18,176 +15,99 @@ interface HistoryDataItem {
   level: number;
 }
 
-interface Notification {
-  _id: string;
-  type: string;
-  message: string;
-  date: string;
-  userId: string;
-  read: boolean;
-}
 
 export default function HistoryScreen() {
-  const { historyData, notifications } = useAppContext();
-  const [activeTab, setActiveTab] = useState<"chart" | "notifications">(
-    "chart"
-  );
+  const { historyData } = useAppContext();
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Water History</Text>
+        <Text style={styles.title}>Tank Level History</Text>
       </View>
 
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "chart" && styles.activeTab]}
-          onPress={() => setActiveTab("chart")}
-        >
-          <MaterialCommunityIcons
-            name="chart-line"
-            size={20}
-            color={activeTab === "chart" ? COLORS.primary : COLORS.gray}
-          />
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "chart" && styles.activeTabText,
-            ]}
-          >
-            Level Chart
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            activeTab === "notifications" && styles.activeTab,
-          ]}
-          onPress={() => setActiveTab("notifications")}
-        >
-          <MaterialCommunityIcons
-            name="bell-outline"
-            size={20}
-            color={activeTab === "notifications" ? COLORS.primary : COLORS.gray}
-          />
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "notifications" && styles.activeTabText,
-            ]}
-          >
-            Notifications
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {activeTab === "chart" ? (
-        <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>
-            Water Level History (Coming Soon...)
-          </Text>
-          <ScrollView>
-            {historyData && historyData.length > 0 ? (
-              historyData.map((item: HistoryDataItem, index: number) => (
-                <View key={index} style={styles.historyItem}>
-                  <View style={styles.historyDate}>
-                    <Text style={styles.historyDateText}>
-                      {new Date(item.date).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </Text>
-                  </View>
-                  <View style={styles.historyBarContainer}>
-                    <View
-                      style={[
-                        styles.historyBar,
-                        {
-                          width: `${item.level}%`,
-                          backgroundColor: getWaterLevelColor(item.level),
-                        },
-                      ]}
-                    />
-                    <Text style={styles.historyBarLabel}>{item.level}%</Text>
-                  </View>
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>
+          Tank Level History (Coming Soon...)
+        </Text>
+        <ScrollView>
+          {historyData && historyData.length > 0 ? (
+            historyData.map((item: HistoryDataItem, index: number) => (
+              <View key={index} style={styles.historyItem}>
+                <View style={styles.historyDate}>
+                  <Text style={styles.historyDateText}>
+                    {new Date(item.date).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </Text>
                 </View>
-              ))
-            ) : (
-              <Text style={styles.emptyMessage}>No history data available</Text>
-            )}
-          </ScrollView>
-
-          <View style={styles.legendContainer}>
-            <View style={styles.legendItem}>
-              <View
-                style={[styles.legendColor, { backgroundColor: COLORS.danger }]}
-              />
-              <Text style={styles.legendText}>Critical (&lt; 20%)</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendColor,
-                  { backgroundColor: COLORS.warning },
-                ]}
-              />
-              <Text style={styles.legendText}>Warning (20-40%)</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendColor,
-                  { backgroundColor: COLORS.success },
-                ]}
-              />
-              <Text style={styles.legendText}>Good (&gt; 40%)</Text>
-            </View>
-          </View>
-
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Average Level</Text>
-              <Text style={styles.statValue}>
-                {historyData && historyData.length > 0
-                  ? `${Math.round(
-                      historyData.reduce(
-                        (sum: number, item: HistoryDataItem) =>
-                          sum + item.level,
-                        0
-                      ) / historyData.length
-                    )}%`
-                  : "N/A"}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Lowest Level</Text>
-              <Text style={styles.statValue}>
-                {historyData && historyData.length > 0
-                  ? `${Math.min(
-                      ...historyData.map((item: HistoryDataItem) => item.level)
-                    )}%`
-                  : "N/A"}
-                {}%
-              </Text>
-            </View>
-          </View>
-        </View>
-      ) : (
-        <ScrollView style={styles.notificationsList}>
-          <Text style={styles.notificationsTitle}>Recent Notifications</Text>
-          {notifications.length > 0 ? (
-            notifications.map((notification: Notification) => (
-              <NotificationItemComponent
-                key={notification._id}
-                notification={notification}
-              />
+                <View style={styles.historyBarContainer}>
+                  <View
+                    style={[
+                      styles.historyBar,
+                      {
+                        width: `${item.level}%`,
+                        backgroundColor: getWaterLevelColor(item.level),
+                      },
+                    ]}
+                  />
+                  <Text style={styles.historyBarLabel}>{item.level}%</Text>
+                </View>
+              </View>
             ))
           ) : (
-            <Text style={styles.emptyMessage}>No notifications yet</Text>
+            <Text style={styles.emptyMessage}>No history data available</Text>
           )}
         </ScrollView>
-      )}
+
+        <View style={styles.legendContainer}>
+          <View style={styles.legendItem}>
+            <View
+              style={[styles.legendColor, { backgroundColor: COLORS.danger }]}
+            />
+            <Text style={styles.legendText}>Critical (&lt; 20%)</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View
+              style={[styles.legendColor, { backgroundColor: COLORS.warning }]}
+            />
+            <Text style={styles.legendText}>Warning (20-40%)</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View
+              style={[styles.legendColor, { backgroundColor: COLORS.success }]}
+            />
+            <Text style={styles.legendText}>Good (&gt; 40%)</Text>
+          </View>
+        </View>
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Average Level</Text>
+            <Text style={styles.statValue}>
+              {historyData && historyData.length > 0
+                ? `${Math.round(
+                    historyData.reduce(
+                      (sum: number, item: HistoryDataItem) => sum + item.level,
+                      0
+                    ) / historyData.length
+                  )}%`
+                : "N/A"}
+            </Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Lowest Level</Text>
+            <Text style={styles.statValue}>
+              {historyData && historyData.length > 0
+                ? `${Math.min(
+                    ...historyData.map((item: HistoryDataItem) => item.level)
+                  )}%`
+                : "N/A"}
+              {}%
+            </Text>
+          </View>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -206,31 +126,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: COLORS.text,
-  },
-  tabContainer: {
-    flexDirection: "row",
-    backgroundColor: COLORS.white,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  tab: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  activeTab: {
-    backgroundColor: COLORS.lightGray,
-  },
-  tabText: {
-    marginLeft: 4,
-    color: COLORS.gray,
-  },
-  activeTabText: {
-    color: COLORS.primary,
-    fontWeight: "500",
   },
   chartContainer: {
     flex: 1,
@@ -316,16 +211,6 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: "bold",
-    color: COLORS.text,
-  },
-  notificationsList: {
-    flex: 1,
-    padding: 16,
-  },
-  notificationsTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
     color: COLORS.text,
   },
   emptyMessage: {
