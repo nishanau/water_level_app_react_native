@@ -53,6 +53,7 @@ export function ManualOrderModal({
 }: ManualOrderModalProps) {
   const [quantity, setQuantity] = useState("");
   const [selectedSupplier, setSelectedSupplier] = useState(preferredSupplier);
+  const [selectedTank, setSelectedTank] = useState(tanks[0]?._id);
   const [deliveryDate, setDeliveryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [notes, setNotes] = useState("");
@@ -88,14 +89,12 @@ export function ManualOrderModal({
       Alert.alert("Invalid Input", "Please select a supplier");
       return;
     }
-    console.log("tanks", tanks);
-    const tankId = tanks._id;
     onConfirm({
       quantity: orderQuantity,
       supplierId: selectedSupplier,
       requestedDeliveryDate: deliveryDate,
       deliveryNotes: notes,
-      tankId,
+      tankId: selectedTank,
       price,
     });
   };
@@ -127,6 +126,24 @@ export function ManualOrderModal({
               value={quantity}
               onChangeText={setQuantity}
             />
+            <Text style={styles.label}>Select Tank</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedTank}
+                onValueChange={(value) => setSelectedTank(value)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select tank" value="" />
+                {tanks.map((tank) => (
+                  <Picker.Item
+                    key={tank._id}
+                    label={tank.deviceId}
+                    value={tank._id}
+                    style={styles.dropdownText}
+                  />
+                ))}
+              </Picker>
+            </View>
 
             <Text style={styles.label}>Select Supplier</Text>
             <View style={styles.pickerContainer}>

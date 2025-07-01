@@ -1,6 +1,7 @@
 import { useAppContext } from "@/AppContext";
 import { OrderItem } from "@/components";
 import { COLORS } from "@/constants";
+import orderService from "@/services/orderService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
@@ -48,50 +49,62 @@ interface DateTimePickerEvent {
 }
 
 export default function OrdersScreen() {
-  const { orders, cancelOrder, rescheduleOrder } = useAppContext();
+  const { orders, rescheduleOrder, user, setNewNotification } = useAppContext();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [datePickerVisible, setDatePickerVisible] = useState<boolean>(false);
   const [showCancelConfirmModal, setShowCancelConfirmModal] =
     useState<boolean>(false);
-  const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
 
   // Filter orders by status
   const upcomingOrders = orders.filter(
     (order: Order) =>
+      order.status === "scheduled" ||
       order.status === "placed" ||
-      order.status === "accepted" ||
-      order.status === "in_transit"
+      order.status === "acknowledged"
   );
 
   const pastOrders = orders.filter(
     (order: Order) =>
-      order.status === "delivered" || order.status === "cancelled"
+      order.status === "completed" || order.status === "cancelled"
   );
 
   // Show cancel confirmation modal
-  const showCancelConfirmation = (orderId: string): void => {
-    setOrderToCancel(orderId);
+  const showCancelConfirmation = (order: Order): void => {
+    setOrderToCancel(order);
     setShowCancelConfirmModal(true);
   };
 
   // Handle order cancellation
   const handleCancelOrder = async (): Promise<void> => {
     try {
-          if (orderToCancel) {
-      await cancelOrder(orderToCancel);
-      setOrderToCancel(null);
-    }
-    setShowCancelConfirmModal(false);
-  } catch (error) {
-    Alert.alert(
-      "Cancellation Failed",
+      if (orderToCancel) {
+        await orderService.cancelOrder(orderToCancel._id);
+        setOrderToCancel(null);
+        const newNoti = {
+          userId: user.id,
+          type: "order",
+          message: `Order ${orderToCancel.orderNumber} cancelled successfully!`,
+          relatedTo: "order",
+          read: false,
+          sentVia: ["push"],
+        };
+        setNewNotification(newNoti);
+      }
+
+      Alert.alert(
+        "Order Cancelled",
+        "Your order has been cancelled successfully."
+      );
+      setShowCancelConfirmModal(false);
+    } catch {
+      Alert.alert(
+        "Cancellation Failed",
         "An error occurred while cancelling the order. Please try again later."
       );
-      console.error("Failed to cancel order:", error);
     }
-
   };
   // Handle order rescheduling
   const handleReschedule = (order: Order): void => {
@@ -112,7 +125,7 @@ export default function OrdersScreen() {
 
       if (userSelectedDate && selectedOrder) {
         // Only reschedule if user actually selected a date
-        rescheduleOrder(selectedOrder.id, date);
+        rescheduleOrder(selectedOrder._id, date);
       }
       // If cancelled or dismissed, do nothing
       setSelectedOrder(null);
@@ -132,7 +145,7 @@ export default function OrdersScreen() {
   // Confirm rescheduling (for iOS)
   const confirmRescheduling = (): void => {
     if (selectedOrder) {
-      rescheduleOrder(selectedOrder.id, selectedDate);
+      rescheduleOrder(selectedOrder._id, selectedDate);
       setShowDatePicker(false);
       setSelectedOrder(null);
     }
@@ -167,16 +180,7 @@ export default function OrdersScreen() {
                 upcomingOrders.map((order: Order) => (
                   <OrderItem
                     key={order._id}
-                    order={{
-                      id: order._id,
-                      date: order.orderDate,
-                      status: order.status,
-                      amount: order.quantity,
-                      price: order.price,
-                      deliveryDate: order.scheduledDeliveryDate ,
-                      invoice: order.orderNumber,
-                      name: order.orderNumber,
-                    }}
+                    order={order}
                     onCancel={showCancelConfirmation}
                     onReschedule={handleReschedule}
                   />
@@ -203,16 +207,7 @@ export default function OrdersScreen() {
                 pastOrders.map((order: Order) => (
                   <OrderItem
                     key={order._id}
-                    order={{
-                      id: order.id,
-                      date: order.orderDate,
-                      status: order.status,
-                      amount: order.quantity,
-                      price: order.price,
-                      deliveryDate: order.scheduledDeliveryDate,
-                      invoice: order.orderNumber,
-                      name: order.orderNumber,
-                    }}
+                    order={order}
                     onCancel={undefined}
                     onReschedule={undefined}
                   />
@@ -295,8 +290,8 @@ export default function OrdersScreen() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Cancel Order</Text>
             <Text style={styles.modalText}>
-              Are you sure you want to cancel order {orderToCancel}? This action
-              cannot be undone.
+              Are you sure you want to cancel order {orderToCancel?._id}? This
+              action cannot be undone.
             </Text>
 
             <View style={styles.modalButtons}>

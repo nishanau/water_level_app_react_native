@@ -3,6 +3,7 @@ import { CircularProgressIndicator } from "@/components";
 import { ManualOrderModal } from "@/components/ManualOrderModal";
 import { calculateDaysRemaining, COLORS, formatDate } from "@/constants";
 import apiService from "@/services/apiService";
+import orderService from "@/services/orderService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -39,7 +40,6 @@ export default function HomeScreen() {
     nextDelivery,
     autoOrder,
     user,
-    placeOrder,
     loading,
     setUser,
     setAutoOrder,
@@ -48,10 +48,11 @@ export default function HomeScreen() {
     tanks,
     setSelectedTank,
     selectedTank,
+    setNewNotification,
   } = useAppContext();
 
   useEffect(() => {
-    const selectTankData = tanks.find((tank:any) => tank._id === selectedTank);
+    const selectTankData = tanks.find((tank: any) => tank._id === selectedTank);
 
     setTankSize(selectTankData?.capacity || 0);
     setAvgDailyUsage(selectTankData?.avgDailyUsage || 0);
@@ -121,10 +122,29 @@ export default function HomeScreen() {
     price: number;
   }) => {
     try {
-      await placeOrder(orderData);
+      const order = await orderService.placeOrder(orderData);
+
+      const newNoti = {
+        userId: user.id,
+        type: "order",
+        message: `Order placed successfully!`,
+        relatedTo: "order",
+        read: false,
+        sentVia: ["push"],
+      };
+      setNewNotification(newNoti);
       setShowManualOrderModal(false);
+      // Refresh user data to get updated orders
+      // Show success alert
+      Alert.alert("Order Placed", "Your order has been placed successfully.");
+      return order;
     } catch (error) {
       console.error("Failed to place order:", error);
+      Alert.alert(
+        "Error",
+        "Failed to place your order. Please try again later."
+      );
+      throw error;
     }
   };
 

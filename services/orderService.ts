@@ -16,7 +16,7 @@ class OrderService {
 
   async placeOrder(orderData) {
     try {
-      const response = await api.post("/orders", { ...orderData });
+      const response = await api.post("/orders/", { ...orderData });
       console.log("Order placed successfully:", response.data);
       return response.data;
     } catch (error) {
@@ -25,9 +25,13 @@ class OrderService {
     }
   }
 
-  async cancelOrder(orderId:string) {
-    await api.patch(`/orders/${orderId}/cancel`);
-  }
+  cancelOrder = async (orderId: string) => {
+    try {
+      await api.patch(`/orders/${orderId}/cancel`);
+    } catch {
+      throw new Error("Error cancelling order");
+    }
+  };
 }
 
 export default new OrderService();

@@ -9,20 +9,18 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { useAppContext } from "../AppContext";
 import { COLORS } from "../constants";
-
+import authService from "../services/authService";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const context = useAppContext();
+  const { setUser, setIsAuthenticated, setNewNotification } = useAppContext();
 
-  const { login } = context;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
 
   const validateForm = () => {
@@ -42,27 +40,36 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!validateForm()) return;
-
+    const credentials = {
+      email: email.trim(),
+      password,
+    };
     setLoginLoading(true);
     try {
-      await login({ email, password });
-      //  router.replace("/(tabs)"); // Use proper route instead of "/(tabs)"
-    } catch (error: any) {
-      Alert.alert(
-        "Login Failed",
-        error.message || "An error occurred during login"
-      );
+      const response = await authService.login(credentials);
+      setUser(response.user);
+      setIsAuthenticated(true);
+
+      const newNoti = {
+        userId: response.user.id,
+        type: "system",
+        message: `Welcome back, ${response.user.firstName}!`,
+        relatedTo: "users",
+        read: false,
+        sentVia: ["push"],
+      };
+      setNewNotification(newNoti);
+
+      return response;
+    } catch (error) {
+      console.error("Login failed:", error);
+      const errorMessage = error.message || "Login failed. Please try again.";
+      Alert.alert("Login Error", errorMessage);
+      throw error;
     } finally {
       setLoginLoading(false);
     }
   };
-  if (!context) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -109,9 +116,11 @@ export default function LoginScreen() {
             disabled={loginLoading}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              {loginLoading && <ActivityIndicator color={COLORS.white} />}
-
-              <Text style={styles.loginButtonText}> Login</Text>
+              {loginLoading ? (
+                <ActivityIndicator color={COLORS.white} />
+              ) : (
+                <Text style={styles.loginButtonText}> Login</Text>
+              )}
             </View>
           </TouchableOpacity>
 

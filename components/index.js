@@ -1,6 +1,13 @@
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import {
+  Linking,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { COLORS, getWaterLevelColor } from "../constants";
 
@@ -192,14 +199,16 @@ export const CircularProgressIndicator = ({
 export const OrderItem = ({ order, onCancel, onReschedule }) => {
   const getStatusColor = (status) => {
     switch (status) {
-      case "Delivered":
+      case "completed":
         return "#28a745";
       case "In Transit":
         return "#0088cc";
-      case "Scheduled":
+      case "scheduled":
         return "#ffc107";
-      case "Cancelled":
+      case "cancelled":
         return "#dc3545";
+      case "placed":
+        return "#17a2b8";
       default:
         return "#888888";
     }
@@ -208,7 +217,7 @@ export const OrderItem = ({ order, onCancel, onReschedule }) => {
   return (
     <View style={styles.orderItem}>
       <View style={styles.orderHeader}>
-        <Text style={styles.orderId}>{order.name}</Text>
+        <Text style={styles.orderId}>{order.orderNumber}</Text>
         <View
           style={[
             styles.statusBadge,
@@ -221,31 +230,33 @@ export const OrderItem = ({ order, onCancel, onReschedule }) => {
 
       <View style={styles.orderDetails}>
         <Text style={styles.orderDate}>
-          Order Date: {new Date(order.date).toLocaleDateString()}
+          Order Date: {new Date(order.orderDate).toLocaleDateString()}
         </Text>
-        {order.deliveryDate ? (
+        {order.scheduledDeliveryDate ? (
           <Text style={styles.deliveryDate}>
-            Delivery: {new Date(order.deliveryDate).toLocaleDateString()}
+            Delivery:{" "}
+            {new Date(order.scheduledDeliveryDate).toLocaleDateString()}
           </Text>
         ) : (
           <Text style={styles.deliveryDate}>Delivery: Not Scheduled</Text>
         )}
+        <Text>Supplier: {order.supplier.company} </Text>
         <Text style={styles.orderAmount}>
-          Amount: {order.amount} L • ${order.price.toFixed(2)}
+          Amount: {order.quantity} L • ${order.price.toFixed(2)}
         </Text>
       </View>
 
-      {(order.status === "Scheduled" || order.status === "placed") && (
+      {(order.status === "scheduled" || order.status === "placed") && (
         <View style={styles.orderActions}>
           {onCancel && (
             <Text
               style={[styles.actionButton, styles.cancelButton]}
-              onPress={() => onCancel(order.id)}
+              onPress={() => onCancel(order)}
             >
               Cancel
             </Text>
           )}
-          {onReschedule && order.status === "Scheduled" && (
+          {onReschedule && order.status === "scheduled" && (
             <Text
               style={[styles.actionButton, styles.rescheduleButton]}
               onPress={() => onReschedule(order)}
@@ -256,8 +267,16 @@ export const OrderItem = ({ order, onCancel, onReschedule }) => {
         </View>
       )}
 
-      {order.invoice && (
-        <Text style={styles.invoiceLink}>Invoice: {order.invoice}</Text>
+      {order.invoice ? (
+        <TouchableOpacity
+          onPress={() => Linking.openURL(order.invoice.downloadURL)}
+        >
+          <Text style={styles.invoiceLink}>
+            Invoice: {order.invoice.fileName}
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <Text>No Invoice Available</Text>
       )}
     </View>
   );
@@ -474,9 +493,9 @@ const styles = StyleSheet.create({
     color: "#004085",
   },
   invoiceLink: {
-    marginTop: 10,
     color: "#0088cc",
     textDecorationLine: "underline",
+    cursor: "pointer",
   },
 
   // Notification Item

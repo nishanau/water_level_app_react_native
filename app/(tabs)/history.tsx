@@ -23,6 +23,8 @@ interface Notification {
   type: string;
   message: string;
   date: string;
+  userId: string;
+  read: boolean;
 }
 
 export default function HistoryScreen() {
@@ -82,7 +84,9 @@ export default function HistoryScreen() {
 
       {activeTab === "chart" ? (
         <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>Water Level History (Coming Soon...)</Text>
+          <Text style={styles.chartTitle}>
+            Water Level History (Coming Soon...)
+          </Text>
           <ScrollView>
             {historyData && historyData.length > 0 ? (
               historyData.map((item: HistoryDataItem, index: number) => (

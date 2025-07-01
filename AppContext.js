@@ -46,10 +46,6 @@ export function AppProvider({ children }) {
   const [tanks, setTanks] = useState([]);
   const [selectedTank, setSelectedTank] = useState(tanks[0]?._id || null);
 
-  //states to track placing and cancelling orders
-  const [placedOrder, setPlacedOrder] = useState(false);
-  const [cancelledOrder, setCancelledOrder] = useState(false);
-
   // Refs to handle race conditions
   const isMounted = useRef(true);
   const loadingUserData = useRef(false);
@@ -73,13 +69,16 @@ export function AppProvider({ children }) {
     if (loadingUserData.current) return;
 
     try {
+      console.log("Checking authentication status...");
       setLoading(true);
       const { token, user } = await authService.checkAuth();
 
       if (token && user && isMounted.current) {
+        console.log("User is authenticated:", user);
         setUser(user);
         setIsAuthenticated(true);
       } else if (isMounted.current) {
+        console.log("User is not authenticated");
         // Explicitly set unauthenticated state
         setUser(null);
         setIsAuthenticated(false);
@@ -92,7 +91,7 @@ export function AppProvider({ children }) {
         setIsAuthenticated(false);
       }
     } finally {
-      setLoading(false);
+      setLoading(false); // Load user data if authenticated
     }
   };
 
@@ -122,10 +121,12 @@ export function AppProvider({ children }) {
 
       // Only update state if component is still mounted
       if (isMounted.current) {
-        console.log("tanks in loadUserData:", tanksResponse);
+        console.log(
+          "User data loaded successfully",
+          user.notificationPreferences
+        );
         setTanks(tanksResponse || []);
         setSelectedTank(tanksResponse[0]?._id || null);
-
         setNotifications(notification || []);
         setTankSize(tanksResponse[0].capacity || 0);
         setAvgDailyUsage(tanksResponse[0].avgDailyUsage || 0);
@@ -157,54 +158,13 @@ export function AppProvider({ children }) {
   }, [user]);
 
   // Load user data when user changes
-  useEffect(() => {
-    if (user || placedOrder || cancelledOrder) {
-      if (placedOrder) {
-        setPlacedOrder(false);
-        loadUserData();
-        return;
-      }
-      if (cancelledOrder) {
-        setCancelledOrder(false);
-        loadUserData();
-        return;
-      }
+  useEffect(
+    () => {
       loadUserData();
-    }
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, placedOrder, cancelledOrder]);
-
-  const login = useCallback(async (credentials) => {
-    try {
-      setLoading(true);
-      const response = await authService.login(credentials);
-
-      if (isMounted.current) {
-        setUser(response.user);
-        setIsAuthenticated(true);
-
-        const newNoti = {
-          userId: response.user.id,
-          type: "system",
-          message: `Welcome back, ${response.user.firstName}!`,
-          relatedTo: "users",
-          read: false,
-          sentVia: ["push"],
-        };
-        setNewNotification(newNoti);
-      }
-      return response;
-    } catch (error) {
-      console.error("Login failed:", error);
-      const errorMessage = error.message || "Login failed. Please try again.";
-      Alert.alert("Login Error", errorMessage);
-      throw error;
-    } finally {
-      if (isMounted.current) {
-        setLoading(false);
-      }
-    }
-  }, []);
+    [user]
+  );
 
   const logout = useCallback(async () => {
     try {
@@ -230,6 +190,9 @@ export function AppProvider({ children }) {
   // Send push notification
   const schedulePushNotification = async (title, body) => {
     if (Platform.OS === "web") {
+      console.log(
+        `A push notification with message "${body}" should be shown in the app.`
+      );
       return;
     }
     await Notifications.scheduleNotificationAsync({
@@ -249,10 +212,8 @@ export function AppProvider({ children }) {
           schedulePushNotification(newNotification.title, newNotification.body);
         }
         await notificationService.createNotification(newNotification);
-
-        setNotifications((prev) => [newNotification, ...prev]);
+        await loadUserData();
         setNewNotification(null);
-        console.log("Notification created successfully");
       } catch (error) {
         console.error("Failed to schedule notification:", error);
       }
@@ -271,70 +232,6 @@ export function AppProvider({ children }) {
     setOrders([]);
   }, []);
 
-  const placeOrder = useCallback(
-    async (orderData) => {
-      try {
-        const order = await orderService.placeOrder(orderData);
-        setPlacedOrder(true);
-        const newNoti = {
-          userId: user.id,
-          type: "order",
-          message: `Order placed successfully!`,
-          relatedTo: "order",
-          read: false,
-          sentVia: ["push"],
-        };
-        setNewNotification(newNoti);
-        console.log("Order placed successfully");
-        return order;
-      } catch (error) {
-        console.error("Failed to place order:", error);
-        Alert.alert(
-          "Error",
-          "Failed to place your order. Please try again later."
-        );
-        throw error;
-      }
-    },
-    [loadUserData]
-  );
-
-  const cancelOrder = useCallback(
-    async (orderId) => {
-      try {
-        await orderService.cancelOrder(orderId);
-        setCancelledOrder(true);
-        const newNoti = {
-          userId: user.id,
-          type: "order",
-          message: `Order cancelled successfully!`,
-          relatedTo: "order",
-          read: false,
-          sentVia: ["push"],
-        };
-        setNewNotification(newNoti);
-        console.log("Order cancelled successfully");
-        return true;
-      } catch (error) {
-        console.error("Failed to cancel order:", error);
-        Alert.alert(
-          "Cancel Error",
-          "Failed to cancel your order. Please try again later."
-        );
-        return false;
-      }
-    },
-    [loadUserData]
-  );
-
-  // Refresh user data on demand
-  const refreshUserData = useCallback(async () => {
-    if (user && !loadingUserData.current) {
-      await loadUserData();
-      return true;
-    }
-    return false;
-  }, [user, loadUserData]);
 
   // Create a memoized context value to prevent unnecessary renders
   const contextValue = {
@@ -342,7 +239,6 @@ export function AppProvider({ children }) {
     isAuthenticated,
     user,
     loading,
-    login,
     logout,
 
     // App state
@@ -362,9 +258,6 @@ export function AppProvider({ children }) {
 
     // Methods
     setAutoOrder,
-    placeOrder,
-    cancelOrder,
-    refreshUserData,
     loadUserData,
     setUser,
     checkAuth,
@@ -374,6 +267,8 @@ export function AppProvider({ children }) {
     setPreferredSupplier,
     setSuppliers,
     setSelectedTank,
+    setNewNotification,
+    setIsAuthenticated,
   };
 
   return (

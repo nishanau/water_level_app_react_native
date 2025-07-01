@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosInstance } from "axios";
 
-const API_URL = "http://192.168.3.68:3000/api"; // Replace with your actual API URL
+const API_URL = "http://192.168.167.68:3000/api"; // Replace with your actual API URL
 // const API_URL = "http://192.168.101.94:3000/api"
 
 class ApiService {
@@ -19,7 +19,7 @@ class ApiService {
     });
 
     this.setupInterceptors();
-    this.initializeToken(); // Don't await here, let it run in background
+    this.initializeToken();
   }
 
   private async initializeToken() {
@@ -35,29 +35,34 @@ class ApiService {
     }
   }
 
-  private setupInterceptors() {
-    this.api.interceptors.request.use(
-      async (config) => {
-        const token = await AsyncStorage.getItem("userToken");
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
-
-    this.api.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        if (error.response?.status === 401) {
-          await AsyncStorage.removeItem("userToken");
-          await AsyncStorage.removeItem("userData");
-        }
-        return Promise.reject(error);
+private setupInterceptors() {
+  this.api.interceptors.request.use(
+    async (config) => {
+      const token = await AsyncStorage.getItem("userToken");
+      const refreshToken = await AsyncStorage.getItem("refresh_token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
-    );
-  }
+      if (refreshToken) {
+        
+        config.headers["x-refresh-token"] = refreshToken;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  this.api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      if (error.response?.status === 401) {
+        await AsyncStorage.removeItem("userToken");
+        await AsyncStorage.removeItem("userData");
+      }
+      return Promise.reject(error);
+    }
+  );
+}
   /**
    * Patch multiple fields in any table.
    * @param table The table/collection name (e.g., "users", "orders")

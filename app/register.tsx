@@ -1,16 +1,16 @@
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAppContext } from "../AppContext";
 import { COLORS } from "../constants";
@@ -80,7 +80,7 @@ export default function RegisterScreen() {
         email,
         password,
         phoneNumber,
-        role,
+        role: "customer", // Default role
         address,
         notificationPreferences: {
           push: true,
@@ -117,42 +117,6 @@ export default function RegisterScreen() {
             <Text style={styles.title}>Create Account</Text>
 
             <View style={styles.form}>
-              <View style={styles.roleToggle}>
-                <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    role === "customer" && styles.roleButtonActive,
-                  ]}
-                  onPress={() => setRole("customer")}
-                >
-                  <Text
-                    style={[
-                      styles.roleButtonText,
-                      role === "customer" && styles.roleButtonTextActive,
-                    ]}
-                  >
-                    Customer
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    role === "supplier" && styles.roleButtonActive,
-                  ]}
-                  onPress={() => setRole("supplier")}
-                >
-                  <Text
-                    style={[
-                      styles.roleButtonText,
-                      role === "supplier" && styles.roleButtonTextActive,
-                    ]}
-                  >
-                    Supplier
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
               <TextInput
                 style={styles.input}
                 placeholder="First Name"
