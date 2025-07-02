@@ -16,6 +16,11 @@ export interface AuthResponse {
   };
 }
 
+export interface RegisterResponse {
+  message: string;
+  success: boolean;
+}
+
 export interface RegisterData {
   firstName: string;
   lastName: string;
@@ -128,15 +133,42 @@ class AuthService {
     }
   }
 
-  async register(userData: RegisterData): Promise<void> {
+  async register(userData: RegisterData): Promise<RegisterResponse> {
     try {
-      await this.api.post("/auth/register-user", userData);
+      return await this.api.post("/auth/register-user", userData);
     } catch (error: any) {
       console.error(
         "Registration error:",
         error.toJSON ? error.toJSON() : error
       );
       throw new Error(error.response?.data?.message || "Registration failed");
+    }
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    try {
+      const response = await this.api.post("/auth/forgot-password", { email });
+      return response.data;
+    } catch (error: any) {
+      console.error("Password reset request error:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to request password reset"
+      );
+    }
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    try {
+      const response = await this.api.post("/auth/reset-password", {
+        token,
+        password: newPassword,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to reset password"
+      );
     }
   }
 }

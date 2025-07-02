@@ -1,7 +1,8 @@
 import { COLORS, getWaterLevelColor } from "@/constants";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export const TankLevel = ({
   level,
@@ -10,6 +11,7 @@ export const TankLevel = ({
   avgDailyUsage,
   daysRemaining,
 }) => {
+  const router = useRouter();
   const color = getWaterLevelColor(level);
 
   // Tank dimensions
@@ -49,7 +51,21 @@ export const TankLevel = ({
             <Text style={styles.infoLabel}>Est Days Rem:</Text>
             <Text style={styles.infoValue}>{daysRemaining} days</Text>
           </View>
+
+          {/* Usage Chart Button */}
+          <TouchableOpacity
+            style={styles.usageChartButton}
+            onPress={() => router.push("/(tabs)/history")}
+          >
+            <MaterialCommunityIcons
+              name="chart-line"
+              size={16}
+              color={COLORS.white}
+            />
+            <Text style={styles.usageChartText}>Usage Chart</Text>
+          </TouchableOpacity>
         </View>
+
         {/* Right: Tank visual */}
         <View style={styles.tankVisualCol}>
           <View
@@ -206,5 +222,26 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     letterSpacing: 0.2,
     textAlign: "center",
+  },
+  usageChartButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.primary,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    marginTop: 8,
+    alignSelf: "flex-start",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  usageChartText: {
+    color: COLORS.white,
+    fontWeight: "600",
+    fontSize: 13,
+    marginLeft: 6,
   },
 });

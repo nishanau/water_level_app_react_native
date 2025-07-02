@@ -546,6 +546,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 50,
+    marginBottom: 40,
     // Remove backgroundColor to allow gradient to show
   },
   scrollContent: {
