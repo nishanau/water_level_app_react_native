@@ -12,10 +12,21 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { COLORS } from "../constants";
 import authService from "../services/authService";
+
+// Custom water-themed colors to match other screens
+const AQUA_COLORS = {
+  primary: "#0088cc", // Deeper blue
+  secondary: "#4fb3ff", // Bright blue
+  accent: "#00c6ff", // Cyan blue
+  light: "#e1f5fe", // Very light blue
+  medium: "#b3e5fc", // Light blue
+  dark: "#0277bd", // Dark blue
+  gradient: ["#e3f0ff", "#c2e9fb", "#f8fbff"], // Enhanced blue gradient
+};
 
 type TankInput = {
   deviceId: string;
@@ -605,9 +616,9 @@ export default function RegisterScreen() {
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Beautiful gradient background */}
+      {/* Enhanced water-themed gradient background */}
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
@@ -622,8 +633,32 @@ export default function RegisterScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.replace("/login")}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={24}
+              color={AQUA_COLORS.primary}
+            />
+          </TouchableOpacity>
+
           <View style={styles.content}>
-            <Text style={styles.title}>Create Account</Text>
+            <View style={styles.headerContainer}>
+              <Text style={styles.title}>Create Account</Text>
+              <Text style={styles.subtitle}>
+                Let's set up your AquaPulse account
+              </Text>
+              <View style={styles.waterIconContainer}>
+                <MaterialCommunityIcons
+                  name="water-pump"
+                  size={28}
+                  color={AQUA_COLORS.primary}
+                />
+              </View>
+            </View>
 
             <View style={styles.formCard}>
               {renderStepper()}
@@ -635,6 +670,12 @@ export default function RegisterScreen() {
                     style={styles.backButton}
                     onPress={handleBack}
                   >
+                    <MaterialCommunityIcons
+                      name="chevron-left"
+                      size={20}
+                      color={COLORS.text}
+                      style={{ marginRight: 4 }}
+                    />
                     <Text style={styles.backButtonText}>Back</Text>
                   </TouchableOpacity>
                 )}
@@ -644,6 +685,12 @@ export default function RegisterScreen() {
                     onPress={handleNext}
                   >
                     <Text style={styles.nextButtonText}>Next</Text>
+                    <MaterialCommunityIcons
+                      name="chevron-right"
+                      size={20}
+                      color={COLORS.white}
+                      style={{ marginLeft: 4 }}
+                    />
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
@@ -651,6 +698,12 @@ export default function RegisterScreen() {
                     onPress={handleRegister}
                     disabled={loading}
                   >
+                    <MaterialCommunityIcons
+                      name="account-check"
+                      size={20}
+                      color={COLORS.white}
+                      style={{ marginRight: 8 }}
+                    />
                     <Text style={styles.registerButtonText}>
                       {loading ? "Creating Account..." : "Create Account"}
                     </Text>
@@ -664,6 +717,10 @@ export default function RegisterScreen() {
                   <Text style={styles.loginLink}>Login</Text>
                 </TouchableOpacity>
               </View>
+            </View>
+
+            <View style={styles.appInfoContainer}>
+              <Text style={styles.appInfoText}>AquaPulse v1.0.0</Text>
             </View>
           </View>
         </ScrollView>
@@ -692,20 +749,53 @@ const styles = StyleSheet.create({
     left: 16,
     zIndex: 10,
     padding: 8,
-    backgroundColor: "transparent",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   content: {
     padding: 24,
     paddingTop: 60,
   },
+  headerContainer: {
+    marginBottom: 24,
+    position: "relative",
+  },
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 24,
+    color: AQUA_COLORS.dark,
+    marginBottom: 8,
     textAlign: "center",
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: COLORS.gray,
+    textAlign: "center",
+  },
+  waterIconContainer: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   formCard: {
     backgroundColor: "rgba(255, 255, 255, 0.95)",
@@ -716,6 +806,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 20,
     elevation: 8,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: AQUA_COLORS.light,
   },
   stepperRow: {
     flexDirection: "row",
@@ -740,7 +834,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   stepCircleActive: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: AQUA_COLORS.primary,
   },
   stepCircleCompleted: {
     backgroundColor: COLORS.success,
@@ -764,7 +858,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   stepLabelActive: {
-    color: COLORS.primary,
+    color: AQUA_COLORS.primary,
     fontWeight: "700",
   },
   stepLine: {
@@ -930,6 +1024,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   backButton: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#F5F7FA",
     borderRadius: 12,
     paddingVertical: 14,
@@ -939,12 +1035,14 @@ const styles = StyleSheet.create({
     borderColor: "#E9ECF2",
   },
   nextButton: {
-    backgroundColor: COLORS.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: AQUA_COLORS.primary,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 24,
     marginLeft: 8,
-    shadowColor: COLORS.primary,
+    shadowColor: AQUA_COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -956,18 +1054,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   registerButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: AQUA_COLORS.primary,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 24,
     flex: 1,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     marginLeft: 8,
-    shadowColor: COLORS.primary,
+    shadowColor: AQUA_COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
+  },
+  registerButtonText: {
+    color: COLORS.white,
+    fontWeight: "600",
+    fontSize: 18,
   },
   loginPrompt: {
     flexDirection: "row",
@@ -980,9 +1085,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   loginLink: {
-    color: COLORS.primary,
+    color: AQUA_COLORS.primary,
     fontSize: 14,
     fontWeight: "600",
+  },
+  appInfoContainer: {
+    alignItems: "center",
+    marginTop: 30,
+  },
+  appInfoText: {
+    color: COLORS.gray,
+    fontSize: 12,
   },
 
   // ...rest of existing styles...

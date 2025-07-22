@@ -20,6 +20,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+// Custom water-themed colors to match history and orders screens
+const AQUA_COLORS = {
+  primary: "#0088cc", // Deeper blue
+  secondary: "#4fb3ff", // Bright blue
+  accent: "#00c6ff", // Cyan blue
+  light: "#e1f5fe", // Very light blue
+  medium: "#b3e5fc", // Light blue
+  dark: "#0277bd", // Dark blue
+  gradient: ["#e3f0ff", "#c2e9fb", "#f8fbff"], // Enhanced blue gradient
+};
+
 // Tank Settings Sub-Screen
 function TankSettingsScreen({ onBack }: { onBack: () => void }) {
   const {
@@ -80,24 +92,41 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
+
+      {/* Enhanced water-themed header */}
       <View style={styles.header}>
+        <LinearGradient
+          colors={["rgba(0,136,204,0.15)", "rgba(0,136,204,0)"]}
+          style={styles.headerGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
             name="arrow-left"
             size={24}
-            color={COLORS.primary}
+            color={AQUA_COLORS.primary}
           />
         </TouchableOpacity>
         <Text style={styles.title}>Tank Settings</Text>
       </View>
 
       <ScrollView style={styles.scrollView}>
-        <View style={styles.section}>
+        <View style={styles.settingsCard}>
+          <View style={styles.settingIconHeader}>
+            <MaterialCommunityIcons
+              name="water-pump"
+              size={24}
+              color={AQUA_COLORS.primary}
+            />
+            <Text style={styles.settingCardTitle}>Tank Configuration</Text>
+          </View>
+
           <SettingItem title="Tank Size">
             <View style={styles.inputRow}>
               <TextInput
@@ -145,6 +174,12 @@ function TankSettingsScreen({ onBack }: { onBack: () => void }) {
             style={styles.saveButton}
             onPress={saveTankSettings}
           >
+            <MaterialCommunityIcons
+              name="content-save"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
+            />
             <Text style={styles.saveButtonText}>Save Tank Settings</Text>
           </TouchableOpacity>
         </View>
@@ -198,30 +233,47 @@ function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
+
+      {/* Enhanced water-themed header */}
       <View style={styles.header}>
+        <LinearGradient
+          colors={["rgba(0,136,204,0.15)", "rgba(0,136,204,0)"]}
+          style={styles.headerGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
             name="arrow-left"
             size={24}
-            color={COLORS.primary}
+            color={AQUA_COLORS.primary}
           />
         </TouchableOpacity>
         <Text style={styles.title}>Order Settings</Text>
       </View>
 
       <ScrollView style={styles.scrollView}>
-        <View style={styles.section}>
+        <View style={styles.settingsCard}>
+          <View style={styles.settingIconHeader}>
+            <MaterialCommunityIcons
+              name="truck-delivery"
+              size={24}
+              color={AQUA_COLORS.primary}
+            />
+            <Text style={styles.settingCardTitle}>Delivery Preferences</Text>
+          </View>
+
           <SettingItem title="Auto-Order">
             <Switch
               value={localAutoOrder}
               onValueChange={setLocalAutoOrder}
-              trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
-              thumbColor={localAutoOrder ? COLORS.primary : "#f4f3f4"}
+              trackColor={{ false: "#d1d1d1", true: AQUA_COLORS.secondary }}
+              thumbColor={localAutoOrder ? AQUA_COLORS.primary : "#f4f3f4"}
             />
           </SettingItem>
 
@@ -255,6 +307,12 @@ function OrderSettingsScreen({ onBack }: { onBack: () => void }) {
             style={styles.saveButton}
             onPress={saveOrderSettings}
           >
+            <MaterialCommunityIcons
+              name="content-save"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
+            />
             <Text style={styles.saveButtonText}>Save Order Settings</Text>
           </TouchableOpacity>
         </View>
@@ -287,30 +345,47 @@ function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
+
+      {/* Enhanced water-themed header */}
       <View style={styles.header}>
+        <LinearGradient
+          colors={["rgba(0,136,204,0.15)", "rgba(0,136,204,0)"]}
+          style={styles.headerGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
             name="arrow-left"
             size={24}
-            color={COLORS.primary}
+            color={AQUA_COLORS.primary}
           />
         </TouchableOpacity>
         <Text style={styles.title}>Notification Settings</Text>
       </View>
 
       <ScrollView style={styles.scrollView}>
-        <View style={styles.section}>
+        <View style={styles.settingsCard}>
+          <View style={styles.settingIconHeader}>
+            <MaterialCommunityIcons
+              name="bell-ring"
+              size={24}
+              color={AQUA_COLORS.primary}
+            />
+            <Text style={styles.settingCardTitle}>Alert Preferences</Text>
+          </View>
+
           <SettingItem title="Push Notifications">
             <Switch
               value={localNotifications.push}
               onValueChange={() => toggleNotification("push")}
-              trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
-              thumbColor={localNotifications.push ? COLORS.primary : "#f4f3f4"}
+              trackColor={{ false: "#d1d1d1", true: AQUA_COLORS.secondary }}
+              thumbColor={localNotifications.push ? AQUA_COLORS.primary : "#f4f3f4"}
             />
           </SettingItem>
 
@@ -318,8 +393,8 @@ function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
             <Switch
               value={localNotifications.sms}
               onValueChange={() => toggleNotification("sms")}
-              trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
-              thumbColor={localNotifications.sms ? COLORS.primary : "#f4f3f4"}
+              trackColor={{ false: "#d1d1d1", true: AQUA_COLORS.secondary }}
+              thumbColor={localNotifications.sms ? AQUA_COLORS.primary : "#f4f3f4"}
             />
           </SettingItem>
 
@@ -327,8 +402,8 @@ function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
             <Switch
               value={localNotifications.email}
               onValueChange={() => toggleNotification("email")}
-              trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
-              thumbColor={localNotifications.email ? COLORS.primary : "#f4f3f4"}
+              trackColor={{ false: "#d1d1d1", true: AQUA_COLORS.secondary }}
+              thumbColor={localNotifications.email ? AQUA_COLORS.primary : "#f4f3f4"}
             />
           </SettingItem>
 
@@ -336,9 +411,13 @@ function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
             style={styles.saveButton}
             onPress={saveNotificationSettings}
           >
-            <Text style={styles.saveButtonText}>
-              Save Notification Settings
-            </Text>
+            <MaterialCommunityIcons
+              name="content-save"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.saveButtonText}>Save Notification Settings</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -436,24 +515,41 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
+
+      {/* Enhanced water-themed header */}
       <View style={styles.header}>
+        <LinearGradient
+          colors={["rgba(0,136,204,0.15)", "rgba(0,136,204,0)"]}
+          style={styles.headerGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
             name="arrow-left"
             size={24}
-            color={COLORS.primary}
+            color={AQUA_COLORS.primary}
           />
         </TouchableOpacity>
         <Text style={styles.title}>Account Settings</Text>
       </View>
 
       <ScrollView style={styles.scrollView}>
-        <View style={styles.section}>
+        <View style={styles.settingsCard}>
+          <View style={styles.settingIconHeader}>
+            <MaterialCommunityIcons
+              name="account-circle"
+              size={24}
+              color={AQUA_COLORS.primary}
+            />
+            <Text style={styles.settingCardTitle}>Personal Information</Text>
+          </View>
+
           <SettingItem title="Full Name">
             <TextInput
               style={styles.input}
@@ -484,16 +580,28 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
           </SettingItem>
 
           <TouchableOpacity style={styles.saveButton} onPress={saveUserProfile}>
+            <MaterialCommunityIcons
+              name="content-save"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
+            />
             <Text style={styles.saveButtonText}>Save Profile</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
               styles.saveButton,
-              { backgroundColor: COLORS.secondary, marginTop: 24 },
+              { backgroundColor: AQUA_COLORS.secondary, marginTop: 24 },
             ]}
             onPress={() => setShowResetPasswordModal(true)}
           >
+            <MaterialCommunityIcons
+              name="lock-reset"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
+            />
             <Text style={styles.saveButtonText}>Reset Password</Text>
           </TouchableOpacity>
         </View>
@@ -507,7 +615,14 @@ function AccountSettingsScreen({ onBack }: { onBack: () => void }) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Reset Password</Text>
+            <View style={styles.modalIconHeader}>
+              <MaterialCommunityIcons
+                name="lock-reset"
+                size={28}
+                color={AQUA_COLORS.primary}
+              />
+              <Text style={styles.modalTitle}>Reset Password</Text>
+            </View>
 
             <TextInput
               style={[styles.input, { marginVertical: 8 }]}
@@ -682,31 +797,48 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
+
+      {/* Enhanced water-themed header */}
       <View style={styles.header}>
+        <LinearGradient
+          colors={["rgba(0,136,204,0.15)", "rgba(0,136,204,0)"]}
+          style={styles.headerGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <MaterialCommunityIcons
             name="arrow-left"
             size={24}
-            color={COLORS.primary}
+            color={AQUA_COLORS.primary}
           />
         </TouchableOpacity>
         <Text style={styles.title}>Payment Methods</Text>
       </View>
 
       <ScrollView style={styles.scrollView}>
-        <View style={styles.section}>
+        <View style={styles.settingsCard}>
+          <View style={styles.settingIconHeader}>
+            <MaterialCommunityIcons
+              name="credit-card"
+              size={24}
+              color={AQUA_COLORS.primary}
+            />
+            <Text style={styles.settingCardTitle}>Billing Information</Text>
+          </View>
+
           {paymentMethods.map((method) => (
             <View key={method.id} style={styles.paymentMethodItem}>
               <View style={styles.paymentMethodIcon}>
                 <MaterialCommunityIcons
                   name={method.type === "credit_card" ? "credit-card" : "bank"}
                   size={24}
-                  color={COLORS.primary}
+                  color={AQUA_COLORS.primary}
                 />
                 {method.isDefault && (
                   <View style={styles.defaultBadge}>
@@ -767,6 +899,12 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
             style={[styles.saveButton, { marginTop: 16 }]}
             onPress={() => setShowAddPaymentModal(true)}
           >
+            <MaterialCommunityIcons
+              name="credit-card-plus"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
+            />
             <Text style={styles.saveButtonText}>Add Payment Method</Text>
           </TouchableOpacity>
         </View>
@@ -780,7 +918,14 @@ function PaymentSettingsScreen({ onBack }: { onBack: () => void }) {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { width: "90%" }]}>
-            <Text style={styles.modalTitle}>Add Payment Method</Text>
+            <View style={styles.modalIconHeader}>
+              <MaterialCommunityIcons
+                name="credit-card-plus"
+                size={28}
+                color={AQUA_COLORS.primary}
+              />
+              <Text style={styles.modalTitle}>Add Payment Method</Text>
+            </View>
 
             <TextInput
               style={[styles.input, { marginVertical: 8 }]}
@@ -859,6 +1004,7 @@ export default function SettingsScreen() {
   const { user, logout } = useAppContext();
   const [activeScreen, setActiveScreen] = useState("main");
   const [showSignOutModal, setShowSignOutModal] = useState(false);
+
   // Navigate to sub-screens
   const navigateToScreen = (screen: string) => {
     setActiveScreen(screen);
@@ -898,13 +1044,31 @@ export default function SettingsScreen() {
       return (
         <SafeAreaView style={styles.container}>
           <LinearGradient
-            colors={["#e3f0ff", "#f8fbff", "#fff"]}
+            colors={AQUA_COLORS.gradient}
             style={StyleSheet.absoluteFill}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
           />
+
+          {/* Enhanced water-themed header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Settings</Text>
+            <LinearGradient
+              colors={["rgba(0,136,204,0.15)", "rgba(0,136,204,0)"]}
+              style={styles.headerGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            />
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>Account Settings</Text>
+              <Text style={styles.subtitle}>Manage your preferences</Text>
+            </View>
+            <View style={styles.waterDrop}>
+              <MaterialCommunityIcons
+                name="account-cog"
+                size={24}
+                color={AQUA_COLORS.primary}
+              />
+            </View>
           </View>
 
           <ScrollView style={styles.scrollView}>
@@ -914,12 +1078,13 @@ export default function SettingsScreen() {
               onPress={() => navigateToScreen("tankSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons
-                  name="water-pump"
-                  size={24}
-                  color={COLORS.primary}
-                  style={styles.menuIcon}
-                />
+                <View style={styles.menuIconContainer}>
+                  <MaterialCommunityIcons
+                    name="water-pump"
+                    size={24}
+                    color="#fff"
+                  />
+                </View>
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Tank Settings</Text>
                   <Text style={styles.menuItemDescription}>
@@ -940,12 +1105,15 @@ export default function SettingsScreen() {
               onPress={() => navigateToScreen("orderSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons
-                  name="truck-delivery"
-                  size={24}
-                  color={COLORS.primary}
-                  style={styles.menuIcon}
-                />
+                <View
+                  style={[styles.menuIconContainer, { backgroundColor: AQUA_COLORS.secondary }]}
+                >
+                  <MaterialCommunityIcons
+                    name="truck-delivery"
+                    size={24}
+                    color="#fff"
+                  />
+                </View>
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Order Settings</Text>
                   <Text style={styles.menuItemDescription}>
@@ -966,12 +1134,13 @@ export default function SettingsScreen() {
               onPress={() => navigateToScreen("notificationSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons
-                  name="bell"
-                  size={24}
-                  color={COLORS.primary}
-                  style={styles.menuIcon}
-                />
+                <View style={[styles.menuIconContainer, { backgroundColor: "#4caf50" }]}>
+                  <MaterialCommunityIcons
+                    name="bell"
+                    size={24}
+                    color="#fff"
+                  />
+                </View>
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Notifications</Text>
                   <Text style={styles.menuItemDescription}>
@@ -992,12 +1161,13 @@ export default function SettingsScreen() {
               onPress={() => navigateToScreen("accountSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons
-                  name="account"
-                  size={24}
-                  color={COLORS.primary}
-                  style={styles.menuIcon}
-                />
+                <View style={[styles.menuIconContainer, { backgroundColor: "#9c27b0" }]}>
+                  <MaterialCommunityIcons
+                    name="account"
+                    size={24}
+                    color="#fff"
+                  />
+                </View>
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Account</Text>
                   {user && (
@@ -1020,12 +1190,13 @@ export default function SettingsScreen() {
               onPress={() => navigateToScreen("paymentSettings")}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons
-                  name="credit-card"
-                  size={24}
-                  color={COLORS.primary}
-                  style={styles.menuIcon}
-                />
+                <View style={[styles.menuIconContainer, { backgroundColor: "#ff9800" }]}>
+                  <MaterialCommunityIcons
+                    name="credit-card"
+                    size={24}
+                    color="#fff"
+                  />
+                </View>
                 <View style={styles.menuTextContainer}>
                   <Text style={styles.menuItemTitle}>Payment Methods</Text>
                   <Text style={styles.menuItemDescription}>
@@ -1046,12 +1217,13 @@ export default function SettingsScreen() {
               onPress={() => setShowSignOutModal(true)}
             >
               <View style={styles.menuItemContent}>
-                <MaterialCommunityIcons
-                  name="logout"
-                  size={24}
-                  color={COLORS.danger}
-                  style={styles.menuIcon}
-                />
+                <View style={[styles.menuIconContainer, { backgroundColor: COLORS.danger }]}>
+                  <MaterialCommunityIcons
+                    name="logout"
+                    size={24}
+                    color="#fff"
+                  />
+                </View>
                 <Text style={[styles.menuItemTitle, { color: COLORS.danger }]}>
                   Sign Out
                 </Text>
@@ -1059,7 +1231,7 @@ export default function SettingsScreen() {
             </TouchableOpacity>
 
             <View style={styles.appInfo}>
-              <Text style={styles.appVersion}>Water Tank Monitor v1.0.0</Text>
+              <Text style={styles.appVersion}>AquaPulse v1.0.0</Text>
               <Text style={styles.appCopyright}>© 2025 Nishan Shrestha.</Text>
             </View>
           </ScrollView>
@@ -1072,10 +1244,19 @@ export default function SettingsScreen() {
           >
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Sign Out</Text>
+                <View style={styles.modalIconHeader}>
+                  <MaterialCommunityIcons
+                    name="logout"
+                    size={28}
+                    color={COLORS.danger}
+                  />
+                  <Text style={styles.modalTitle}>Sign Out</Text>
+                </View>
+
                 <Text style={styles.modalText}>
                   Are you sure you want to sign out?
                 </Text>
+
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.cancelButton]}
@@ -1084,7 +1265,11 @@ export default function SettingsScreen() {
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.confirmButton]}
+                    style={[
+                      styles.modalButton,
+                      styles.confirmButton,
+                      { backgroundColor: COLORS.danger },
+                    ]}
                     onPress={handleSignOut}
                   >
                     <Text style={styles.confirmButtonText}>Sign Out</Text>
@@ -1101,34 +1286,99 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   header: {
     padding: 16,
     paddingTop: 60,
-    flexDirection: "row",
+    paddingBottom: 12,
+    position: "relative",
+    overflow: "hidden",
+  },
+  headerGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  headerContent: {
+    position: "relative",
+    zIndex: 1,
+  },
+  waterDrop: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    justifyContent: "center",
     alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   backButton: {
     marginRight: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: COLORS.text,
+    color: AQUA_COLORS.dark,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: COLORS.gray,
+    marginTop: 4,
   },
   scrollView: {
     flex: 1,
   },
-  section: {
-    margin: 16,
-    marginBottom: 24,
+  settingsCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 16,
+    margin: 12,
+    shadowColor: COLORS.black,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: AQUA_COLORS.light,
   },
-  sectionTitle: {
+  settingIconHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: AQUA_COLORS.light,
+  },
+  settingCardTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 12,
-    color: COLORS.text,
+    color: AQUA_COLORS.dark,
+    marginLeft: 8,
   },
   inputRow: {
     flexDirection: "row",
@@ -1137,11 +1387,12 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 4,
+    borderColor: "#E9ECF2",
+    borderRadius: 12,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     fontSize: 16,
+    backgroundColor: "#F5F7FA",
   },
   inputLabel: {
     marginLeft: 8,
@@ -1151,10 +1402,10 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     height: 50,
-    backgroundColor: COLORS.white,
+    backgroundColor: "#F5F7FA",
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 4,
+    borderColor: "#E9ECF2",
+    borderRadius: 12,
     paddingHorizontal: 12,
     fontSize: 16,
   },
@@ -1173,49 +1424,69 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.gray,
     marginTop: 4,
+    fontStyle: "italic",
   },
   saveButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    borderRadius: 4,
+    backgroundColor: AQUA_COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: "center",
     marginTop: 16,
+    flexDirection: "row",
+    justifyContent: "center",
+    shadowColor: AQUA_COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   saveButtonText: {
     color: COLORS.white,
     fontWeight: "600",
     fontSize: 16,
   },
+
   // Menu items for main settings screen
   menuItem: {
     backgroundColor: COLORS.white,
-    borderRadius: 8,
+    borderRadius: 16,
     padding: 16,
-    marginHorizontal: 16,
+    marginHorizontal: 12,
     marginVertical: 8,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   menuItemContent: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
-  menuIcon: {
+  menuIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: AQUA_COLORS.primary,
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 16,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   menuTextContainer: {
     flex: 1,
   },
   menuItemTitle: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
     color: COLORS.text,
     marginBottom: 4,
   },
@@ -1227,6 +1498,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     backgroundColor: COLORS.white,
   },
+
   // Modal styles
   modalOverlay: {
     flex: 1,
@@ -1236,64 +1508,80 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: COLORS.white,
-    borderRadius: 8,
+    borderRadius: 20,
     padding: 24,
     width: "80%",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  modalIconHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    justifyContent: "center",
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
+    fontSize: 20,
+    fontWeight: "600",
+    marginLeft: 10,
     color: COLORS.text,
   },
   modalText: {
     fontSize: 16,
     marginBottom: 24,
     color: COLORS.text,
+    textAlign: "center",
   },
   modalButtons: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
   },
   modalButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 4,
-    marginLeft: 8,
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginHorizontal: 8,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cancelButton: {
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: "#f0f0f0",
+  },
+  confirmButton: {
+    backgroundColor: AQUA_COLORS.primary,
   },
   cancelButtonText: {
     color: COLORS.text,
     fontWeight: "500",
   },
-  confirmButton: {
-    backgroundColor: COLORS.primary,
-  },
   confirmButtonText: {
     color: COLORS.white,
-    fontWeight: "500",
+    fontWeight: "600",
   },
+
   // Payment method styles
   paymentMethodItem: {
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
+    backgroundColor: "#f8fbff",
+    borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     flexDirection: "row",
     alignItems: "center",
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: AQUA_COLORS.light,
   },
   paymentMethodIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: AQUA_COLORS.light,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -1333,9 +1621,11 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   paymentMethodActionText: {
-    color: COLORS.primary,
+    color: AQUA_COLORS.primary,
     fontSize: 14,
+    fontWeight: "500",
   },
+
   appInfo: {
     alignItems: "center",
     padding: 24,

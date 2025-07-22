@@ -9,7 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 
 // Define interfaces for our data types
@@ -17,6 +17,17 @@ interface HistoryDataItem {
   date: string;
   level: number;
 }
+
+// Custom water-themed colors
+const AQUA_COLORS = {
+  primary: "#0088cc", // Deeper blue
+  secondary: "#4fb3ff", // Bright blue
+  accent: "#00c6ff", // Cyan blue
+  light: "#e1f5fe", // Very light blue
+  medium: "#b3e5fc", // Light blue
+  dark: "#0277bd", // Dark blue
+  gradient: ["#e3f0ff", "#c2e9fb", "#f8fbff"], // Enhanced blue gradient
+};
 
 export default function HistoryScreen() {
   const { historyData, loadUserData } = useAppContext();
@@ -30,45 +41,53 @@ export default function HistoryScreen() {
         lowest: 0,
         highest: 0,
         mostRecent: 0,
-        trend: "stable"
+        trend: "stable",
       };
     }
 
-    const levels = historyData.map(item => item.level);
-    const average = levels.reduce((sum, level) => sum + level, 0) / levels.length;
+    const levels = historyData.map((item) => item.level);
+    const average =
+      levels.reduce((sum, level) => sum + level, 0) / levels.length;
     const lowest = Math.min(...levels);
     const highest = Math.max(...levels);
     const mostRecent = historyData[0]?.level || 0;
-    
+
     // Calculate trend over last 7 days
     const recent = historyData.slice(0, Math.min(7, historyData.length));
     const oldestRecent = recent[recent.length - 1]?.level || 0;
-    const trend = mostRecent > oldestRecent 
-      ? "rising" 
-      : mostRecent < oldestRecent 
-        ? "falling" 
+    const trend =
+      mostRecent > oldestRecent
+        ? "rising"
+        : mostRecent < oldestRecent
+        ? "falling"
         : "stable";
-    
+
     return { average, lowest, highest, mostRecent, trend };
   }, [historyData]);
 
   const getTrendIcon = (trend) => {
-    switch(trend) {
-      case "rising": return "trending-up";
-      case "falling": return "trending-down";
-      default: return "trending-neutral";
+    switch (trend) {
+      case "rising":
+        return "trending-up";
+      case "falling":
+        return "trending-down";
+      default:
+        return "trending-neutral";
     }
   };
 
   const getTrendColor = (trend) => {
-    switch(trend) {
-      case "rising": return COLORS.success;
-      case "falling": return COLORS.danger;
-      default: return COLORS.secondary;
+    switch (trend) {
+      case "rising":
+        return COLORS.success;
+      case "falling":
+        return COLORS.danger;
+      default:
+        return AQUA_COLORS.secondary;
     }
   };
 
-  // Pull-to-refresh handler
+  // Pull-to-refresh handler with blue tint
   const onRefresh = async () => {
     setRefreshing(true);
     await loadUserData();
@@ -78,70 +97,152 @@ export default function HistoryScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
+
+      {/* Enhanced water-themed header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Usage Analytics</Text>
-        <Text style={styles.subtitle}>Monitor your water consumption patterns</Text>
+        <LinearGradient
+          colors={["rgba(0,136,204,0.15)", "rgba(0,136,204,0)"]}
+          style={styles.headerGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>Water Analytics</Text>
+          <Text style={styles.subtitle}>Monitor your consumption patterns</Text>
+        </View>
+        <View style={styles.waterDrop}>
+          <MaterialCommunityIcons
+            name="water"
+            size={24}
+            color={AQUA_COLORS.primary}
+          />
+        </View>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[AQUA_COLORS.primary, AQUA_COLORS.secondary]}
+            tintColor={AQUA_COLORS.primary}
+          />
         }
       >
-        {/* Usage Statistics Card */}
+        {/* Usage Statistics Card with water-themed styling */}
         <View style={styles.statsCard}>
           <Text style={styles.cardTitle}>Usage Overview</Text>
-          
+
           <View style={styles.statsDashboard}>
             <View style={styles.statItemCard}>
-              <MaterialCommunityIcons name="water-percent" size={22} color={COLORS.primary} />
+              <MaterialCommunityIcons
+                name="water-percent"
+                size={22}
+                color={AQUA_COLORS.primary}
+              />
               <Text style={styles.statLabel}>Average Level</Text>
               <Text style={styles.statValue}>{Math.round(stats.average)}%</Text>
+              <View style={styles.statBottomBar} />
             </View>
-            
+
             <View style={styles.statItemCard}>
-              <MaterialCommunityIcons name="arrow-down-bold" size={22} color={COLORS.danger} />
+              <MaterialCommunityIcons
+                name="arrow-down-bold"
+                size={22}
+                color={COLORS.danger}
+              />
               <Text style={styles.statLabel}>Lowest</Text>
               <Text style={styles.statValue}>{stats.lowest}%</Text>
+              <View
+                style={[
+                  styles.statBottomBar,
+                  { backgroundColor: COLORS.danger },
+                ]}
+              />
             </View>
-            
+
             <View style={styles.statItemCard}>
-              <MaterialCommunityIcons name="arrow-up-bold" size={22} color={COLORS.success} />
+              <MaterialCommunityIcons
+                name="arrow-up-bold"
+                size={22}
+                color={COLORS.success}
+              />
               <Text style={styles.statLabel}>Highest</Text>
               <Text style={styles.statValue}>{stats.highest}%</Text>
+              <View
+                style={[
+                  styles.statBottomBar,
+                  { backgroundColor: COLORS.success },
+                ]}
+              />
             </View>
-            
+
             <View style={styles.statItemCard}>
-              <MaterialCommunityIcons name={getTrendIcon(stats.trend)} size={22} color={getTrendColor(stats.trend)} />
+              <MaterialCommunityIcons
+                name={getTrendIcon(stats.trend)}
+                size={22}
+                color={getTrendColor(stats.trend)}
+              />
               <Text style={styles.statLabel}>7-Day Trend</Text>
-              <Text style={[styles.statValue, { color: getTrendColor(stats.trend) }]}>
+              <Text
+                style={[
+                  styles.statValue,
+                  { color: getTrendColor(stats.trend) },
+                ]}
+              >
                 {stats.trend.charAt(0).toUpperCase() + stats.trend.slice(1)}
               </Text>
+              <View
+                style={[
+                  styles.statBottomBar,
+                  { backgroundColor: getTrendColor(stats.trend) },
+                ]}
+              />
             </View>
           </View>
         </View>
 
-        {/* Water Level History Chart */}
+        {/* Water Level History Chart with enhanced styling */}
         <View style={styles.chartCard}>
-          <Text style={styles.cardTitle}>Water Level History</Text>
-          
+          <View style={styles.cardHeader}>
+            <MaterialCommunityIcons
+              name="chart-timeline-variant"
+              size={22}
+              color={AQUA_COLORS.primary}
+              style={styles.cardHeaderIcon}
+            />
+            <Text style={styles.cardTitle}>Water Level History</Text>
+          </View>
+
           <View style={styles.chartLegend}>
             <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: COLORS.danger }]} />
+              <View
+                style={[styles.legendColor, { backgroundColor: COLORS.danger }]}
+              />
               <Text style={styles.legendText}>Critical (&lt; 20%)</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: COLORS.warning }]} />
+              <View
+                style={[
+                  styles.legendColor,
+                  { backgroundColor: COLORS.warning },
+                ]}
+              />
               <Text style={styles.legendText}>Warning (20-40%)</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: COLORS.success }]} />
+              <View
+                style={[
+                  styles.legendColor,
+                  { backgroundColor: COLORS.success },
+                ]}
+              />
               <Text style={styles.legendText}>Good (&gt; 40%)</Text>
             </View>
           </View>
@@ -175,41 +276,93 @@ export default function HistoryScreen() {
             </View>
           ) : (
             <View style={styles.emptyChartContainer}>
-              <MaterialCommunityIcons name="chart-timeline-variant" size={48} color={COLORS.lightGray} />
+              <MaterialCommunityIcons
+                name="water-off"
+                size={48}
+                color={AQUA_COLORS.medium}
+              />
               <Text style={styles.emptyMessage}>No history data available</Text>
-              <Text style={styles.emptySubMessage}>Data will appear as your tank levels are monitored</Text>
+              <Text style={styles.emptySubMessage}>
+                Data will appear as your tank levels are monitored
+              </Text>
             </View>
           )}
         </View>
 
-        {/* Consumption Insights Card */}
+        {/* Consumption Insights Card with water drops */}
         <View style={styles.insightsCard}>
-          <Text style={styles.cardTitle}>Consumption Insights</Text>
-          
+          <View style={styles.cardHeader}>
+            <MaterialCommunityIcons
+              name="water-alert"
+              size={22}
+              color={AQUA_COLORS.primary}
+              style={styles.cardHeaderIcon}
+            />
+            <Text style={styles.cardTitle}>Consumption Insights</Text>
+          </View>
+
           <View style={styles.insightItem}>
-            <MaterialCommunityIcons name="water-alert" size={24} color={COLORS.primary} style={styles.insightIcon} />
+            <View style={styles.insightIconContainer}>
+              <MaterialCommunityIcons name="water" size={24} color="#fff" />
+            </View>
             <View style={styles.insightContent}>
               <Text style={styles.insightTitle}>Usage Efficiency</Text>
               <Text style={styles.insightText}>
-                {stats.average > 60 
+                {stats.average > 60
                   ? "Your water levels have been well-maintained. Great job conserving water!"
                   : stats.average > 30
-                    ? "Your water usage is moderate. Consider small adjustments to improve efficiency."
-                    : "Your water levels have been running low. Consider adjusting your consumption habits."}
+                  ? "Your water usage is moderate. Consider small adjustments to improve efficiency."
+                  : "Your water levels have been running low. Consider adjusting your consumption habits."}
               </Text>
             </View>
           </View>
-          
+
           <View style={styles.insightItem}>
-            <MaterialCommunityIcons name="chart-line" size={24} color={COLORS.primary} style={styles.insightIcon} />
+            <View
+              style={[
+                styles.insightIconContainer,
+                { backgroundColor: AQUA_COLORS.secondary },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="chart-line"
+                size={24}
+                color="#fff"
+              />
+            </View>
             <View style={styles.insightContent}>
               <Text style={styles.insightTitle}>Consumption Pattern</Text>
               <Text style={styles.insightText}>
-                {stats.trend === "rising" 
+                {stats.trend === "rising"
                   ? "Your water level is increasing. Recent refill or reduced usage detected."
                   : stats.trend === "falling"
-                    ? "Your water level is decreasing as expected with normal consumption."
-                    : "Your water usage has been consistent over the past week."}
+                  ? "Your water level is decreasing as expected with normal consumption."
+                  : "Your water usage has been consistent over the past week."}
+              </Text>
+            </View>
+          </View>
+
+          {/* Water saving tips section */}
+          <View style={styles.tipsContainer}>
+            <Text style={styles.tipsTitle}>Water Saving Tips</Text>
+            <View style={styles.tipItem}>
+              <MaterialCommunityIcons
+                name="lightbulb-on"
+                size={16}
+                color={AQUA_COLORS.primary}
+              />
+              <Text style={styles.tipText}>
+                Fix leaky taps to save up to 5,000L yearly
+              </Text>
+            </View>
+            <View style={styles.tipItem}>
+              <MaterialCommunityIcons
+                name="lightbulb-on"
+                size={16}
+                color={AQUA_COLORS.primary}
+              />
+              <Text style={styles.tipText}>
+                Collect rainwater for garden irrigation
               </Text>
             </View>
           </View>
@@ -222,6 +375,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 40,
   },
   scrollView: {
     flex: 1,
@@ -230,11 +384,42 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 60,
     paddingBottom: 12,
+    position: "relative",
+    overflow: "hidden",
+  },
+  headerGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  headerContent: {
+    position: "relative",
+    zIndex: 1,
+  },
+  waterDrop: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: COLORS.text,
+    color: AQUA_COLORS.dark,
   },
   subtitle: {
     fontSize: 14,
@@ -252,11 +437,23 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: AQUA_COLORS.light,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  cardHeaderIcon: {
+    marginRight: 8,
   },
   cardTitle: {
     fontSize: 17,
     fontWeight: "600",
-    color: COLORS.primary,
+    color: AQUA_COLORS.primary,
     marginBottom: 16,
   },
   statsDashboard: {
@@ -271,6 +468,20 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     alignItems: "center",
+    position: "relative",
+    overflow: "hidden",
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "rgba(0,136,204,0.1)",
+  },
+  statBottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: AQUA_COLORS.primary,
   },
   statLabel: {
     fontSize: 13,
@@ -293,6 +504,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: AQUA_COLORS.light,
   },
   chartLegend: {
     flexDirection: "row",
@@ -382,14 +597,28 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: AQUA_COLORS.light,
   },
   insightItem: {
     flexDirection: "row",
     marginBottom: 16,
   },
-  insightIcon: {
+  insightIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: AQUA_COLORS.primary,
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
-    marginTop: 2,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   insightContent: {
     flex: 1,
@@ -397,12 +626,34 @@ const styles = StyleSheet.create({
   insightTitle: {
     fontSize: 15,
     fontWeight: "600",
-    color: COLORS.text,
+    color: AQUA_COLORS.dark,
     marginBottom: 4,
   },
   insightText: {
     fontSize: 14,
     color: COLORS.gray,
     lineHeight: 20,
+  },
+  tipsContainer: {
+    marginTop: 16,
+    backgroundColor: AQUA_COLORS.light,
+    borderRadius: 12,
+    padding: 12,
+  },
+  tipsTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: AQUA_COLORS.dark,
+    marginBottom: 8,
+  },
+  tipItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  tipText: {
+    fontSize: 13,
+    color: COLORS.text,
+    marginLeft: 6,
   },
 });

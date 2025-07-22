@@ -1,5 +1,5 @@
 import { useAppContext } from "@/AppContext";
-import { OrderItem } from "@/components/OrderCard";
+import OrderItem from "@/components/OrderCard"; // Make sure this import is correct
 import { COLORS } from "@/constants";
 import orderService from "@/services/orderService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -49,6 +49,17 @@ interface DateTimePickerEvent {
     timestamp?: number;
   };
 }
+
+// Custom water-themed colors to match history screen
+const AQUA_COLORS = {
+  primary: "#0088cc", // Deeper blue
+  secondary: "#4fb3ff", // Bright blue
+  accent: "#00c6ff", // Cyan blue
+  light: "#e1f5fe", // Very light blue
+  medium: "#b3e5fc", // Light blue
+  dark: "#0277bd", // Dark blue
+  gradient: ["#e3f0ff", "#c2e9fb", "#f8fbff"], // Enhanced blue gradient
+};
 
 export default function OrdersScreen() {
   const { orders, rescheduleOrder, user, setNewNotification, loadUserData } =
@@ -170,34 +181,70 @@ export default function OrdersScreen() {
   // Render header for each section
   const renderSectionHeader = (title: string, count: number) => (
     <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <Text style={styles.sectionCount}>{count} orders</Text>
+      <View style={styles.sectionTitleContainer}>
+        <MaterialCommunityIcons
+          name={title.includes("Upcoming") ? "truck-delivery" : "history"}
+          size={22}
+          color={AQUA_COLORS.primary}
+          style={{ marginRight: 8 }}
+        />
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
+      <View style={styles.countBadge}>
+        <Text style={styles.sectionCount}>{count}</Text>
+      </View>
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Gradient background */}
+      {/* Enhanced gradient background */}
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
 
+      {/* Enhanced water-themed header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Orders</Text>
+        <LinearGradient
+          colors={["rgba(0,136,204,0.15)", "rgba(0,136,204,0)"]}
+          style={styles.headerGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>Water Deliveries</Text>
+          <Text style={styles.subtitle}>Manage your delivery schedule</Text>
+        </View>
+        <View style={styles.waterDrop}>
+          <MaterialCommunityIcons
+            name="truck-delivery"
+            size={24}
+            color={AQUA_COLORS.primary}
+          />
+        </View>
       </View>
+
       <FlatList
         data={[]}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[AQUA_COLORS.primary, AQUA_COLORS.secondary]}
+            tintColor={AQUA_COLORS.primary}
+          />
         }
         ListHeaderComponent={() => (
           <View>
             {/* Upcoming Orders Section */}
-            <View>
-              {renderSectionHeader("Upcoming Orders", upcomingOrders.length)}
+            <View style={styles.sectionContainer}>
+              {renderSectionHeader(
+                "Upcoming Deliveries",
+                upcomingOrders.length
+              )}
               {upcomingOrders.length > 0 ? (
                 upcomingOrders.map((order: Order) => (
                   <View style={styles.orderCardWrapper} key={order._id}>
@@ -210,22 +257,24 @@ export default function OrdersScreen() {
                 ))
               ) : (
                 <View style={styles.emptyContainer}>
-                  <MaterialCommunityIcons
-                    name="truck-delivery-outline"
-                    size={48}
-                    color={COLORS.gray}
-                  />
-                  <Text style={styles.emptyText}>No upcoming orders</Text>
+                  <View style={styles.emptyIconContainer}>
+                    <MaterialCommunityIcons
+                      name="truck-delivery-outline"
+                      size={42}
+                      color="#fff"
+                    />
+                  </View>
+                  <Text style={styles.emptyText}>No upcoming deliveries</Text>
                   <Text style={styles.emptySubtext}>
-                    Your next order will appear here
+                    Orders you place will appear here
                   </Text>
                 </View>
               )}
             </View>
 
             {/* Past Orders Section */}
-            <View>
-              {renderSectionHeader("Past Orders", pastOrders.length)}
+            <View style={styles.sectionContainer}>
+              {renderSectionHeader("Delivery History", pastOrders.length)}
               {pastOrders.length > 0 ? (
                 pastOrders.map((order: Order) => (
                   <View style={styles.orderCardWrapper} key={order._id}>
@@ -238,12 +287,22 @@ export default function OrdersScreen() {
                 ))
               ) : (
                 <View style={styles.emptyContainer}>
-                  <MaterialCommunityIcons
-                    name="history"
-                    size={48}
-                    color={COLORS.gray}
-                  />
-                  <Text style={styles.emptyText}>No past orders</Text>
+                  <View
+                    style={[
+                      styles.emptyIconContainer,
+                      { backgroundColor: AQUA_COLORS.secondary },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name="history"
+                      size={42}
+                      color="#fff"
+                    />
+                  </View>
+                  <Text style={styles.emptyText}>No delivery history</Text>
+                  <Text style={styles.emptySubtext}>
+                    Completed deliveries will be shown here
+                  </Text>
                 </View>
               )}
             </View>
@@ -272,7 +331,14 @@ export default function OrdersScreen() {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Reschedule Delivery</Text>
+              <View style={styles.modalIconHeader}>
+                <MaterialCommunityIcons
+                  name="calendar-clock"
+                  size={30}
+                  color={AQUA_COLORS.primary}
+                />
+                <Text style={styles.modalTitle}>Reschedule Delivery</Text>
+              </View>
 
               <DateTimePicker
                 value={selectedDate}
@@ -312,10 +378,18 @@ export default function OrdersScreen() {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Cancel Order</Text>
+            <View style={styles.modalIconHeader}>
+              <MaterialCommunityIcons
+                name="cancel"
+                size={30}
+                color={COLORS.danger}
+              />
+              <Text style={styles.modalTitle}>Cancel Delivery</Text>
+            </View>
+
             <Text style={styles.modalText}>
-              Are you sure you want to cancel order {orderToCancel?._id}? This
-              action cannot be undone.
+              Are you sure you want to cancel this delivery? This action cannot
+              be undone.
             </Text>
 
             <View style={styles.modalButtons}>
@@ -347,16 +421,56 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    marginBottom: 40,
   },
   header: {
     padding: 16,
     paddingTop: 60,
+    paddingBottom: 12,
+    position: "relative",
+    overflow: "hidden",
+  },
+  headerGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  headerContent: {
+    position: "relative",
+    zIndex: 1,
+  },
+  waterDrop: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: COLORS.text,
+    color: AQUA_COLORS.dark,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: COLORS.gray,
+    marginTop: 4,
+  },
+  sectionContainer: {
+    marginBottom: 16,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -364,33 +478,65 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    // marginTop: 16,
+    backgroundColor: "rgba(255,255,255,0.6)",
+    borderRadius: 10,
+    marginHorizontal: 12,
+    marginBottom: 8,
+  },
+  sectionTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: COLORS.text,
+    color: AQUA_COLORS.dark,
+  },
+  countBadge: {
+    backgroundColor: AQUA_COLORS.primary,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    minWidth: 24,
+    alignItems: "center",
   },
   sectionCount: {
-    fontSize: 14,
-    color: COLORS.gray,
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.white,
   },
   emptyContainer: {
     padding: 32,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.6)",
+    margin: 12,
+    borderRadius: 16,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: AQUA_COLORS.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   emptyText: {
     fontSize: 16,
     fontWeight: "500",
-    color: COLORS.gray,
-    marginTop: 12,
+    color: COLORS.text,
+    marginBottom: 6,
   },
   emptySubtext: {
     fontSize: 14,
     color: COLORS.gray,
-    marginTop: 4,
-  }, // Modal styles
+  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -405,18 +551,30 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     margin: 16,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  modalIconHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
-    textAlign: "center",
-    marginBottom: 16,
+    marginLeft: 10,
+    color: AQUA_COLORS.dark,
   },
   modalText: {
     fontSize: 16,
     color: COLORS.text,
     textAlign: "center",
     marginBottom: 24,
+    lineHeight: 22,
   },
   modalButtons: {
     flexDirection: "row",
@@ -426,15 +584,20 @@ const styles = StyleSheet.create({
   modalButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     marginHorizontal: 8,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cancelButton: {
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: "#f0f0f0",
   },
   confirmButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: AQUA_COLORS.primary,
   },
   cancelButtonText: {
     color: COLORS.text,
@@ -442,10 +605,10 @@ const styles = StyleSheet.create({
   },
   confirmButtonText: {
     color: COLORS.white,
-    fontWeight: "500",
+    fontWeight: "600",
   },
   orderCardWrapper: {
-    marginHorizontal: 8,
-    marginVertical: 8,
+    marginHorizontal: 12,
+    marginVertical: 6,
   },
 });

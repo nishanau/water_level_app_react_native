@@ -27,6 +27,17 @@ import {
   View,
 } from "react-native";
 
+// Custom water-themed colors to match other screens
+const AQUA_COLORS = {
+  primary: "#0088cc", // Deeper blue
+  secondary: "#4fb3ff", // Bright blue
+  accent: "#00c6ff", // Cyan blue
+  light: "#e1f5fe", // Very light blue
+  medium: "#b3e5fc", // Light blue
+  dark: "#0277bd", // Dark blue
+  gradient: ["#e3f0ff", "#c2e9fb", "#f8fbff"], // Enhanced blue gradient
+};
+
 interface Notification {
   _id: string;
   type: string;
@@ -64,7 +75,6 @@ export default function HomeScreen() {
     selectedTank,
     setNewNotification,
     notifications,
-    notificationPreferences,
     loadUserData,
   } = useAppContext();
 
@@ -91,6 +101,7 @@ export default function HomeScreen() {
     avgDailyUsage
   );
 
+  // Auto-order toggle function
   const toggleAutoOrder = async () => {
     const newAutoOrderValue = !autoOrder;
     try {
@@ -181,6 +192,7 @@ export default function HomeScreen() {
   const handleAddTank = () => {
     Alert.alert("Add Tank", "Add tank feature coming soon!");
   };
+
   const handleRefresh = () => {
     loadUserData();
     Alert.alert("Refreshed", "Data refreshed.");
@@ -213,7 +225,11 @@ export default function HomeScreen() {
       onPress={() => setSelectedTank(tank._id)}
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <MaterialCommunityIcons name="water" size={22} color={COLORS.primary} />
+        <MaterialCommunityIcons
+          name="water-pump"
+          size={22}
+          color={AQUA_COLORS.primary}
+        />
         <Text style={styles.tankOverviewTitle}>{tank.deviceId}</Text>
       </View>
       <Text style={styles.tankOverviewDetail}>Capacity: {tank.capacity} L</Text>
@@ -223,12 +239,15 @@ export default function HomeScreen() {
       <View
         style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}
       >
-        <Ionicons name="location-sharp" size={16} color={COLORS.secondary} />
+        <Ionicons
+          name="location-sharp"
+          size={16}
+          color={AQUA_COLORS.secondary}
+        />
         <Text style={styles.tankOverviewLocation} numberOfLines={1}>
           {tank.location?.address || "No location"}
         </Text>
       </View>
-      {/* Removed Selected/View button */}
     </TouchableOpacity>
   );
 
@@ -238,79 +257,100 @@ export default function HomeScreen() {
         backgroundColor={colorScheme === "dark" ? "#fff" : "#000"}
         barStyle={colorScheme === "dark" ? "dark-content" : "light-content"}
       />
-      {/* Gradient background for the whole screen */}
+
+      {/* Enhanced water-themed gradient background */}
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[AQUA_COLORS.primary, AQUA_COLORS.secondary]}
+            tintColor={AQUA_COLORS.primary}
+          />
         }
       >
-        {/* Gradient background */}
-        <View style={styles.gradientBg} />
+        {/* Enhanced water-themed header */}
+        <View style={styles.header}>
+          <LinearGradient
+            colors={["rgba(0,136,204,0.15)", "rgba(0,136,204,0)"]}
+            style={styles.headerGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
 
-        {/* Greeting and profile */}
-        <Animated.View
-          style={[
-            styles.greetingRow,
-            {
-              opacity: greetingAnim,
-              transform: [
-                {
-                  translateY: greetingAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
-          <View>
-            <Text style={styles.greetingText}>
-              {getGreeting()}, {user?.firstName || user?.name || "User"}!
-            </Text>
-            <Text style={styles.greetingSubText}>Welcome back 👋</Text>
-          </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <TouchableOpacity
-              style={styles.notificationsButton}
-              onPress={() => setActiveTab("notifications")}
+          {/* Greeting and profile */}
+          <Animated.View
+            style={[
+              styles.greetingRow,
+              {
+                opacity: greetingAnim,
+                transform: [
+                  {
+                    translateY: greetingAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <View>
+              <Text style={styles.greetingText}>
+                {getGreeting()}, {user?.firstName || user?.name || "User"}!
+              </Text>
+              <Text style={styles.greetingSubText}>Welcome to AquaPulse</Text>
+            </View>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
             >
-              <MaterialCommunityIcons
-                name="bell-outline"
-                size={25}
-                color={COLORS.primary}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.avatarBtn}
-              onPress={() => router.push("/settings")}
-            >
-              {/* <Image
-                source={
-                  user?.avatar
-                    ? { uri: user.avatar }
-                    : require("../../assets/images/avatar-default.png")
-                }
-                style={styles.avatarImg}
-              /> */}
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
+              <TouchableOpacity
+                style={styles.notificationsButton}
+                onPress={() => setActiveTab("notifications")}
+              >
+                <MaterialCommunityIcons
+                  name="bell-outline"
+                  size={25}
+                  color={AQUA_COLORS.primary}
+                />
+                {notifications.length > 0 && (
+                  <View style={styles.notificationBadge}>
+                    <Text style={styles.notificationBadgeText}>
+                      {notifications.length}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.avatarBtn}
+                onPress={() => router.push("/settings")}
+              >
+                <MaterialCommunityIcons
+                  name="account-circle"
+                  size={32}
+                  color={AQUA_COLORS.primary}
+                />
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </View>
 
         {/* Tank Overview + Add Tank */}
         {tanks && (
           <View style={styles.tankOverviewRow}>
+            <Text style={styles.sectionTitle}>My Water Tanks</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ alignItems: "center" }}
+              contentContainerStyle={{ paddingHorizontal: 12 }}
             >
               {tanks.length > 0 && tanks.map(renderTankCard)}
               {/* Add Tank Card */}
@@ -319,9 +359,9 @@ export default function HomeScreen() {
                 onPress={handleAddTank}
               >
                 <MaterialCommunityIcons
-                  name="plus-box"
+                  name="plus-circle-outline"
                   size={38}
-                  color={COLORS.primary}
+                  color={AQUA_COLORS.primary}
                 />
                 <Text style={styles.addTankText}>Add Tank</Text>
               </TouchableOpacity>
@@ -329,7 +369,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Main TankLevel */}
+        {/* Main TankLevel with enhanced styling */}
         <View style={styles.tankContainer}>
           {tanks ? (
             <TankLevel
@@ -347,16 +387,55 @@ export default function HomeScreen() {
               )}
             />
           ) : (
-            <ActivityIndicator size="large" color={COLORS.primary} />
+            <ActivityIndicator size="large" color={AQUA_COLORS.primary} />
           )}
         </View>
 
-        {/* Modernized Next Delivery */}
+        {/* Days remaining callout */}
+        <View style={styles.daysRemainingCard}>
+          <MaterialCommunityIcons
+            name="calendar-clock"
+            size={28}
+            color={daysRemaining < 5 ? COLORS.warning : AQUA_COLORS.primary}
+            style={styles.daysRemainingIcon}
+          />
+          <View style={styles.daysRemainingContent}>
+            <Text style={styles.daysRemainingLabel}>
+              Estimated Days Remaining
+            </Text>
+            <Text
+              style={[
+                styles.daysRemainingValue,
+                daysRemaining < 5 && styles.daysRemainingLow,
+              ]}
+            >
+              {daysRemaining} days
+            </Text>
+            <View style={styles.daysRemainingMeter}>
+              <View
+                style={[
+                  styles.daysRemainingFill,
+                  {
+                    width: `${Math.min(100, (daysRemaining / 30) * 100)}%`,
+                    backgroundColor:
+                      daysRemaining < 5
+                        ? COLORS.warning
+                        : daysRemaining < 10
+                        ? COLORS.secondary
+                        : AQUA_COLORS.primary,
+                  },
+                ]}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Next Delivery Card */}
         <View style={styles.deliveryCard}>
           <MaterialCommunityIcons
             name="truck-delivery"
             size={28}
-            color={COLORS.primary}
+            color={AQUA_COLORS.primary}
             style={styles.deliveryIcon}
           />
           <View style={{ flex: 1 }}>
@@ -372,14 +451,14 @@ export default function HomeScreen() {
             <MaterialCommunityIcons
               name="history"
               size={20}
-              color={COLORS.primary}
+              color={AQUA_COLORS.primary}
             />
             <Text style={styles.deliveryActionText}>History</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Modernized Auto-Order */}
-        <View style={styles.autoOrderModernCard}>
+        {/* Auto-Order Card */}
+        <View style={styles.autoOrderCard}>
           <MaterialCommunityIcons
             name="autorenew"
             size={24}
@@ -397,20 +476,63 @@ export default function HomeScreen() {
           <Switch
             value={autoOrder}
             onValueChange={toggleAutoOrder}
-            trackColor={{ false: "#d1d1d1", true: COLORS.secondary }}
-            thumbColor={autoOrder ? COLORS.primary : "#f4f3f4"}
+            trackColor={{ false: "#d1d1d1", true: AQUA_COLORS.secondary }}
+            thumbColor={autoOrder ? AQUA_COLORS.primary : "#f4f3f4"}
           />
         </View>
 
-        {/* Modernized Place Manual Order */}
-        <TouchableOpacity
-          style={[styles.modernOrderBtn, loading && styles.disabledButton]}
-          onPress={handlePlaceOrder}
-          disabled={loading}
-        >
-          <MaterialCommunityIcons name="water" size={22} color={COLORS.white} />
-          <Text style={styles.modernOrderBtnText}>Place Manual Order</Text>
-        </TouchableOpacity>
+        {/* Quick Actions Section */}
+        <View style={styles.quickActionsSection}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+
+          <View style={styles.quickActionsRow}>
+            <TouchableOpacity
+              style={styles.quickActionButton}
+              onPress={handlePlaceOrder}
+            >
+              <View
+                style={[
+                  styles.quickActionIcon,
+                  { backgroundColor: AQUA_COLORS.primary },
+                ]}
+              >
+                <MaterialCommunityIcons name="water" size={24} color="#fff" />
+              </View>
+              <Text style={styles.quickActionText}>Order Water</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickActionButton}
+              onPress={() => router.push("/history")}
+            >
+              <View
+                style={[
+                  styles.quickActionIcon,
+                  { backgroundColor: AQUA_COLORS.secondary },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="chart-line"
+                  size={24}
+                  color="#fff"
+                />
+              </View>
+              <Text style={styles.quickActionText}>View Analytics</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickActionButton}
+              onPress={() => router.push("/settings")}
+            >
+              <View
+                style={[styles.quickActionIcon, { backgroundColor: "#9c27b0" }]}
+              >
+                <MaterialCommunityIcons name="cog" size={24} color="#fff" />
+              </View>
+              <Text style={styles.quickActionText}>Settings</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
         <ManualOrderModal
           visible={showManualOrderModal}
@@ -422,17 +544,11 @@ export default function HomeScreen() {
           tanks={tanks}
         />
       </ScrollView>
+
       {/* Notifications popover */}
       {activeTab === "notifications" && (
         <Pressable
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 99,
-          }}
+          style={styles.notificationOverlay}
           onPress={() => setActiveTab("home")}
         >
           <View style={styles.notificationsPopover} pointerEvents="box-none">
@@ -444,12 +560,12 @@ export default function HomeScreen() {
                 </Text>
                 <TouchableOpacity
                   onPress={() => setActiveTab("home")}
-                  style={{ padding: 4, marginLeft: 8 }}
+                  style={styles.closeNotificationsButton}
                 >
                   <MaterialCommunityIcons
                     name="close"
                     size={20}
-                    color={COLORS.primary}
+                    color={AQUA_COLORS.primary}
                   />
                 </TouchableOpacity>
               </View>
@@ -462,7 +578,21 @@ export default function HomeScreen() {
                     />
                   ))
                 ) : (
-                  <Text style={styles.emptyMessage}>No notifications yet</Text>
+                  <View style={styles.emptyNotifications}>
+                    <MaterialCommunityIcons
+                      name="bell-off-outline"
+                      size={40}
+                      color={COLORS.gray}
+                      style={{ marginBottom: 10 }}
+                    />
+                    <Text style={styles.emptyMessage}>
+                      No notifications yet
+                    </Text>
+                    <Text style={styles.emptySubMessage}>
+                      We'll notify you about important updates and delivery
+                      status changes
+                    </Text>
+                  </View>
                 )}
               </ScrollView>
             </View>
@@ -474,22 +604,339 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  notificationsButton: {
+  container: {
+    flex: 1,
+    marginBottom: 20,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  header: {
+    padding: 16,
+    paddingTop: 60,
+    paddingBottom: 12,
+    position: "relative",
+    overflow: "hidden",
+  },
+  headerGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  greetingRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+    marginBottom: 18,
+    paddingHorizontal: 2,
+    zIndex: 1,
+  },
+  greetingText: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: AQUA_COLORS.dark,
+    marginBottom: 2,
+  },
+  greetingSubText: {
+    fontSize: 15,
+    color: COLORS.gray,
+    fontWeight: "500",
+  },
+  notificationsButton: {
+    position: "relative",
     padding: 8,
     borderRadius: 20,
-    backgroundColor: COLORS.white,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     elevation: 2,
     shadowColor: COLORS.black,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
+  notificationBadge: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.danger,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  notificationBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  avatarBtn: {
+    borderRadius: 24,
+    overflow: "hidden",
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    elevation: 2,
+    shadowColor: COLORS.black,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: AQUA_COLORS.dark,
+    marginLeft: 16,
+    marginBottom: 12,
+  },
+  tankOverviewRow: {
+    marginBottom: 16,
+  },
+  tankOverviewCard: {
+    width: 170,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 14,
+    padding: 14,
+    marginHorizontal: 6,
+    shadowColor: COLORS.black,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  tankOverviewCardSelected: {
+    backgroundColor: "rgba(225, 245, 254, 0.9)",
+    borderColor: AQUA_COLORS.primary,
+  },
+  tankOverviewTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: AQUA_COLORS.dark,
+    marginLeft: 6,
+  },
+  tankOverviewDetail: {
+    fontSize: 13,
+    color: COLORS.gray,
+    marginTop: 6,
+  },
+  tankOverviewLocation: {
+    fontSize: 12,
+    color: AQUA_COLORS.secondary,
+    marginLeft: 4,
+    flexShrink: 1,
+  },
+  addTankCard: {
+    width: 120,
+    height: 120,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: 14,
+    padding: 14,
+    marginHorizontal: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    borderStyle: "dashed",
+    borderWidth: 2,
+    borderColor: AQUA_COLORS.primary,
+  },
+  addTankText: {
+    fontSize: 15,
+    color: AQUA_COLORS.primary,
+    fontWeight: "600",
+    marginTop: 8,
+  },
+  tankContainer: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  daysRemainingCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 14,
+    padding: 16,
+    margin: 12,
+    marginTop: 4,
+    shadowColor: COLORS.black,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: AQUA_COLORS.light,
+  },
+  daysRemainingIcon: {
+    marginRight: 14,
+  },
+  daysRemainingContent: {
+    flex: 1,
+  },
+  daysRemainingLabel: {
+    fontSize: 14,
+    color: COLORS.gray,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  daysRemainingValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: AQUA_COLORS.dark,
+    marginBottom: 6,
+  },
+  daysRemainingLow: {
+    color: COLORS.warning,
+  },
+  daysRemainingMeter: {
+    height: 6,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  daysRemainingFill: {
+    height: "100%",
+    backgroundColor: AQUA_COLORS.primary,
+    borderRadius: 3,
+  },
+  deliveryCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 14,
+    padding: 16,
+    margin: 12,
+    shadowColor: COLORS.black,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: AQUA_COLORS.light,
+  },
+  deliveryIcon: {
+    marginRight: 14,
+  },
+  deliveryLabel: {
+    fontSize: 14,
+    color: COLORS.gray,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  deliveryValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: AQUA_COLORS.dark,
+  },
+  deliveryActionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: AQUA_COLORS.light,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginLeft: 10,
+  },
+  deliveryActionText: {
+    color: AQUA_COLORS.primary,
+    fontWeight: "600",
+    fontSize: 13,
+    marginLeft: 4,
+  },
+  autoOrderCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 14,
+    padding: 16,
+    margin: 12,
+    shadowColor: COLORS.black,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: AQUA_COLORS.light,
+  },
+  autoOrderIcon: {
+    marginRight: 14,
+  },
+  autoOrderLabel: {
+    fontSize: 14,
+    color: COLORS.gray,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  autoOrderDesc: {
+    fontSize: 14,
+    color: COLORS.text,
+    fontWeight: "500",
+  },
+  quickActionsSection: {
+    marginVertical: 16,
+  },
+  quickActionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+  },
+  quickActionButton: {
+    width: "30%",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 14,
+    padding: 12,
+    alignItems: "center",
+    shadowColor: COLORS.black,
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  quickActionIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: AQUA_COLORS.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  quickActionText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: COLORS.text,
+    textAlign: "center",
+  },
+  notificationOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 99,
+  },
   notificationsPopover: {
     position: "absolute",
-    top: 122, // adjust based on your header height
-    right: 68, // align with your bell icon
+    top: 110,
+    right: 60,
     width: 320,
     zIndex: 100,
     alignItems: "flex-end",
@@ -502,397 +949,57 @@ const styles = StyleSheet.create({
     borderBottomWidth: 14,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderBottomColor: COLORS.white,
+    borderBottomColor: "rgba(255, 255, 255, 0.95)",
     marginRight: 16,
   },
   notificationsPopoverContent: {
-    backgroundColor: COLORS.white,
-    borderWidth: 2,
-    borderColor: "white",
-    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: 16,
     padding: 16,
     width: 320,
     maxHeight: 400,
     shadowColor: COLORS.black,
     shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: AQUA_COLORS.light,
   },
   notificationsPopoverHeader: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
     justifyContent: "space-between",
-  },
-  notificationsList: {
-    flex: 1,
-  },
-  emptyMessage: {
-    textAlign: "center",
-    color: COLORS.background,
-    fontSize: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: AQUA_COLORS.light,
+    paddingBottom: 8,
   },
   notificationsTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
-    color: COLORS.text,
-  },
-  notificationHeader: {
-    padding: 30,
-    backgroundColor: COLORS.background,
-  },
-  container: {
-    flex: 1,
-    paddingTop: 50,
-    marginBottom: 40,
-    // Remove backgroundColor to allow gradient to show
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 40,
-    marginBottom: 20,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: COLORS.text,
-  },
-  tankContainer: {
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  infoContainer: {
-    marginVertical: 20,
-  },
-  infoCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  infoIcon: {
-    marginRight: 12,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: COLORS.gray,
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  autoOrderContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
-    padding: 16,
-    marginVertical: 12,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  switchContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  switchLabel: {
     fontSize: 16,
     fontWeight: "600",
-    color: COLORS.text,
+    color: AQUA_COLORS.dark,
   },
-  switchDescription: {
-    fontSize: 14,
-    color: COLORS.gray,
-    marginTop: 4,
+  closeNotificationsButton: {
+    padding: 4,
+    borderRadius: 12,
+    backgroundColor: AQUA_COLORS.light,
   },
-  actionButtonsContainer: {
-    marginVertical: 20,
-  },
-  actionButton: {
-    backgroundColor: COLORS.primary,
-    flexDirection: "row",
+  emptyNotifications: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 16,
-    borderRadius: 10,
-    marginBottom: 12,
+    padding: 20,
   },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  actionButtonText: {
-    color: COLORS.white,
-    fontWeight: "600",
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  quickStats: {
-    flexDirection: "row",
-    marginVertical: 12,
-  },
-  statItem: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
-    padding: 16,
-    marginHorizontal: 4,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: COLORS.gray,
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  tab: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  activeTab: {
-    backgroundColor: COLORS.lightGray,
-  },
-  tabText: {
-    marginLeft: 4,
-    color: COLORS.gray,
-  },
-  activeTabText: {
-    color: COLORS.primary,
-    fontWeight: "500",
-  },
-  gradientBg: {
-    display: "none", // Remove old gradientBg
-  },
-  greetingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 10,
-    marginBottom: 18,
-    paddingHorizontal: 2,
-  },
-  greetingText: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: COLORS.primary,
-    marginBottom: 2,
-  },
-  greetingSubText: {
+  emptyMessage: {
     fontSize: 15,
-    color: COLORS.gray,
     fontWeight: "500",
-  },
-  avatarBtn: {
-    borderRadius: 24,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: COLORS.primary,
-    width: 48,
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: COLORS.white,
-    elevation: 2,
-  },
-  avatarImg: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-
-  // Modernized Next Delivery
-  deliveryCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 18,
-    marginBottom: 14,
-    shadowColor: COLORS.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-    marginTop: 10,
-  },
-  deliveryIcon: {
-    marginRight: 14,
-  },
-  deliveryLabel: {
-    fontSize: 15,
     color: COLORS.gray,
-    fontWeight: "600",
-    marginBottom: 2,
+    marginBottom: 6,
   },
-  deliveryValue: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: COLORS.primary,
-  },
-  deliveryActionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.lightGray,
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginLeft: 10,
-  },
-  deliveryActionText: {
-    color: COLORS.primary,
-    fontWeight: "600",
-    fontSize: 13,
-    marginLeft: 4,
-  },
-
-  // Modernized Auto-Order
-  autoOrderModernCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 18,
-    marginBottom: 14,
-    shadowColor: COLORS.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  autoOrderIcon: {
-    marginRight: 14,
-  },
-  autoOrderLabel: {
-    fontSize: 15,
-    color: COLORS.gray,
-    fontWeight: "600",
-    marginBottom: 2,
-  },
-  autoOrderDesc: {
-    fontSize: 14,
-    color: COLORS.text,
-    fontWeight: "500",
-  },
-
-  // Modernized Place Manual Order
-  modernOrderBtn: {
-    backgroundColor: COLORS.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 18,
-    borderRadius: 14,
-    marginBottom: 18,
-    marginTop: 10,
-    shadowColor: COLORS.primary,
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  modernOrderBtnText: {
-    color: COLORS.white,
-    fontWeight: "700",
-    fontSize: 17,
-    marginLeft: 10,
-    letterSpacing: 0.2,
-  },
-  tankOverviewScrollWrapper: {
-    marginBottom: 18,
-    marginTop: 2,
-  },
-  tankOverviewCard: {
-    width: 170,
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 14,
-    marginRight: 12,
-    shadowColor: COLORS.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "transparent",
-    // transition for smooth highlight
-    transitionProperty: "background-color, border-color",
-    transitionDuration: "200ms",
-  },
-  tankOverviewCardSelected: {
-    backgroundColor: "#e3f0ff",
-    borderColor: COLORS.primary,
-  },
-  tankOverviewTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: COLORS.primary,
-    marginLeft: 6,
-  },
-  tankOverviewDetail: {
+  emptySubMessage: {
     fontSize: 13,
     color: COLORS.gray,
-    marginTop: 2,
-  },
-  tankOverviewLocation: {
-    fontSize: 12,
-    color: COLORS.secondary,
-    marginLeft: 4,
-    flexShrink: 1,
-  },
-  addTankCard: {
-    width: 170,
-    height: 120,
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 14,
-    marginRight: 12,
-    marginLeft: 0,
-    shadowColor: COLORS.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-    justifyContent: "center",
-    alignItems: "center",
-    borderStyle: "dashed",
-    borderWidth: 2,
-    borderColor: COLORS.primary,
-  },
-  addTankText: {
-    fontSize: 15,
-    color: COLORS.primary,
-    fontWeight: "600",
-    marginTop: 8,
+    textAlign: "center",
+    lineHeight: 18,
   },
 });

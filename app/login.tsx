@@ -20,6 +20,17 @@ import { useAppContext } from "../AppContext";
 import { COLORS } from "../constants";
 import authService from "../services/authService";
 
+// Custom water-themed colors to match other screens
+const AQUA_COLORS = {
+  primary: "#0088cc", // Deeper blue
+  secondary: "#4fb3ff", // Bright blue
+  accent: "#00c6ff", // Cyan blue
+  light: "#e1f5fe", // Very light blue
+  medium: "#b3e5fc", // Light blue
+  dark: "#0277bd", // Dark blue
+  gradient: ["#e3f0ff", "#c2e9fb", "#f8fbff"], // Enhanced blue gradient
+};
+
 export default function LoginScreen() {
   const router = useRouter();
   const { setUser, setIsAuthenticated, setNewNotification } = useAppContext();
@@ -81,9 +92,9 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Beautiful gradient background */}
+      {/* Enhanced water-themed gradient background */}
       <LinearGradient
-        colors={["#e3f0ff", "#f8fbff", "#fff"]}
+        colors={AQUA_COLORS.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
@@ -98,24 +109,35 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.content}>
+            {/* Logo with water drop animation */}
             <View style={styles.logoContainer}>
               <Image
                 source={require("../assets/images/name.png")}
                 style={styles.logo}
                 resizeMode="contain"
               />
+              <View style={styles.waterDropContainer}>
+                <MaterialCommunityIcons
+                  name="water"
+                  size={40}
+                  color={AQUA_COLORS.primary}
+                  style={styles.waterDropIcon}
+                />
+              </View>
             </View>
 
             <View style={styles.formCard}>
-              <Text style={styles.welcomeText}>Welcome Back</Text>
-              <Text style={styles.subtitle}>Sign in to continue</Text>
+              <Text style={styles.welcomeText}>Welcome to AquaPulse</Text>
+              <Text style={styles.subtitle}>
+                Monitor and manage your water supply
+              </Text>
 
               <View style={styles.form}>
                 <View style={styles.inputContainer}>
                   <MaterialCommunityIcons
                     name="email-outline"
                     size={22}
-                    color={COLORS.primary}
+                    color={AQUA_COLORS.primary}
                     style={styles.inputIcon}
                   />
                   <TextInput
@@ -134,7 +156,7 @@ export default function LoginScreen() {
                   <MaterialCommunityIcons
                     name="lock-outline"
                     size={22}
-                    color={COLORS.primary}
+                    color={AQUA_COLORS.primary}
                     style={styles.inputIcon}
                   />
                   <TextInput
@@ -175,9 +197,23 @@ export default function LoginScreen() {
                   {loginLoading ? (
                     <ActivityIndicator color={COLORS.white} />
                   ) : (
-                    <Text style={styles.loginButtonText}>Sign In</Text>
+                    <>
+                      <MaterialCommunityIcons
+                        name="login"
+                        size={20}
+                        color={COLORS.white}
+                        style={{ marginRight: 8 }}
+                      />
+                      <Text style={styles.loginButtonText}>Sign In</Text>
+                    </>
                   )}
                 </TouchableOpacity>
+
+                <View style={styles.dividerContainer}>
+                  <View style={styles.divider} />
+                  <Text style={styles.dividerText}>OR</Text>
+                  <View style={styles.divider} />
+                </View>
 
                 <View style={styles.registerContainer}>
                   <Text style={styles.registerText}>Don't have an account? </Text>
@@ -186,6 +222,10 @@ export default function LoginScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
+            </View>
+
+            <View style={styles.appInfoContainer}>
+              <Text style={styles.appInfoText}>AquaPulse v1.0.0</Text>
             </View>
           </View>
         </ScrollView>
@@ -213,11 +253,31 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: "center",
     marginBottom: 30,
+    position: "relative",
   },
   logo: {
     height: 100,
     width: 180,
     marginBottom: 20,
+  },
+  waterDropContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: 70,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 25,
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  waterDropIcon: {
+    transform: [{ rotate: "10deg" }],
   },
   formCard: {
     backgroundColor: "rgba(255, 255, 255, 0.95)",
@@ -228,11 +288,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 20,
     elevation: 8,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: AQUA_COLORS.light,
   },
   welcomeText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: COLORS.text,
+    color: AQUA_COLORS.dark,
     marginBottom: 8,
     textAlign: "center",
   },
@@ -272,18 +336,19 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   forgotPasswordText: {
-    color: COLORS.primary,
+    color: AQUA_COLORS.primary,
     fontSize: 14,
     fontWeight: "500",
   },
   loginButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: AQUA_COLORS.primary,
     borderRadius: 12,
     height: 56,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 24,
-    shadowColor: COLORS.primary,
+    shadowColor: AQUA_COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -297,6 +362,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E9ECF2",
+  },
+  dividerText: {
+    marginHorizontal: 12,
+    color: COLORS.gray,
+    fontSize: 14,
+  },
   registerContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -307,8 +387,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   registerLink: {
-    color: COLORS.primary,
+    color: AQUA_COLORS.primary,
     fontSize: 14,
     fontWeight: "600",
+  },
+  appInfoContainer: {
+    alignItems: "center",
+    marginTop: 30,
+  },
+  appInfoText: {
+    color: COLORS.gray,
+    fontSize: 12,
   },
 });
